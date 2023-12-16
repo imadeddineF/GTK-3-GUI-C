@@ -12,7 +12,7 @@
         "/usr/include/atk-1.0",
         "/usr/include/epoxy",
         "/usr/include/harfbuzz",
-        "/usr/include/cairo" // Add this line for Cairo
+        "/usr/include/cairo"
       ],
       "defines": [],
       "compilerPath": "/usr/bin/gcc",
