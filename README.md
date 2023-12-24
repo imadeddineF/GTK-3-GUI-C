@@ -1,4 +1,4 @@
-# I am going to add more details later
+# GTK 3 desktop application
 
 ### Command 1:
 
