@@ -1,0 +1,15 @@
+Fonctions de base :
+1- Création
+2- Insertion (3 methods)
+3- Suppression (3 methods)
+4- Recherche
+
+
+Métriques d’évaluation :
+1- Exactitude de la solution
+2- L’esthétique de l’interface et la facilité de son utilisation (UI/UX)
+3- La capacité d’apporter des modifications instantanément
+4- La contribution personnelle au-delà de l’énoncé
+
+
+help: https://visualgo.net
