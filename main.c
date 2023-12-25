@@ -283,7 +283,7 @@ int main(int argc, char *argv[])
 
   // Set background pattern using CSS
   GtkCssProvider *provider = gtk_css_provider_new();
-  const gchar *css = "window { background: url('background.png') repeat; }";
+  const gchar *css = "window { background: url('./assets/background.png') repeat; }";
   GError *error = NULL;
   gtk_css_provider_load_from_data(provider, css, -1, &error);
   gtk_style_context_add_provider_for_screen(gdk_screen_get_default(), GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
