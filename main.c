@@ -1,9 +1,4 @@
 #include <gtk/gtk.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <math.h>
-#define M_PI 3.14159265358979323846
 
 typedef struct Node
 {
@@ -98,44 +93,77 @@ void show_message(const gchar *message)
   gtk_widget_destroy(dialog);
 }
 
+void draw_capsule(GtkWidget *widget, cairo_t *cr, gint x, gint y, gint width, gint height, gchar *text)
+{
+  gint radius = height / 2;
+
+  // Draw the capsule frame
+  cairo_set_source_rgb(cr, 0, 0.45, 0.73); // French Blue for frame
+  cairo_move_to(cr, x + radius, y);
+  cairo_line_to(cr, x + width - radius, y);
+  cairo_arc(cr, x + width - radius, y + radius, radius, -G_PI / 2, 0);
+  cairo_line_to(cr, x + width, y + height - radius);
+  cairo_arc(cr, x + width - radius, y + height - radius, radius, 0, G_PI / 2);
+  cairo_line_to(cr, x + radius, y + height);
+  cairo_arc(cr, x + radius, y + height - radius, radius, G_PI / 2, G_PI);
+  cairo_line_to(cr, x, y + radius);
+  cairo_arc(cr, x + radius, y + radius, radius, G_PI, 3 * G_PI / 2);
+  cairo_stroke_preserve(cr);
+
+  // Set a background color
+  cairo_set_source_rgb(cr, 0.69, 0.88, 0.9); // Baby Blue for fill
+  cairo_fill(cr);
+
+  // Center the text inside the capsule
+  PangoLayout *layout = gtk_widget_create_pango_layout(widget, text);
+  PangoRectangle rect;
+  pango_layout_get_pixel_extents(layout, NULL, &rect);
+
+  gint text_x = x + (width - rect.width) / 2;
+  gint text_y = y + (height - rect.height) / 2;
+
+  cairo_set_source_rgb(cr, 0, 0, 0); // Black color for the text
+  cairo_move_to(cr, text_x, text_y);
+  pango_cairo_show_layout(cr, layout);
+  g_object_unref(layout);
+}
+
 void draw_linked_list(GtkWidget *widget, cairo_t *cr, gpointer user_data)
 {
   Node *current = head;
-  int x = 50, y = 50;
+  gint x = 50, y = 50;
+  gint capsule_width = 80;
+  gint capsule_height = 40;
+  gint arrow_distance = 20;
 
   while (current != NULL)
   {
-    // Draw circle filled with baby blue
-    cairo_set_source_rgb(cr, 0.69, 0.88, 0.9); // Baby Blue
-    cairo_arc(cr, x + 20, y + 20, 20, 0, 2 * M_PI);
-    cairo_fill_preserve(cr);
+    gchar value_str[10];
 
-    // Draw border with french blue
-    cairo_set_source_rgb(cr, 0, 0.45, 0.73); // French Blue
-    cairo_set_line_width(cr, 2.0);
-    cairo_stroke(cr);
+    if (current->value >= 0 && current->value < 10)
+    {
+      // Add leading zero for numbers 0 to 9
+      g_snprintf(value_str, sizeof(value_str), "0%d", current->value);
+    }
+    else
+    {
+      g_snprintf(value_str, sizeof(value_str), "%d", current->value);
+    }
 
-    // Draw text
-    cairo_set_source_rgb(cr, 0, 0, 0);
-    char value_str[10];
-    snprintf(value_str, sizeof(value_str), "%d", current->value);
-    cairo_move_to(cr, x + 15, y + 25);
-    cairo_show_text(cr, value_str);
+    draw_capsule(widget, cr, x, y, strlen(value_str) * 10 + 20, capsule_height, value_str);
 
-    x += 60;
+    x += strlen(value_str) * 10 + 20 + arrow_distance;
 
     if (current->next != NULL)
     {
-      // Draw arrow with french blue
       cairo_set_source_rgb(cr, 0, 0.45, 0.73); // French Blue
-      cairo_move_to(cr, x - 20, y + 20);
-      cairo_line_to(cr, x, y + 20);
+      cairo_move_to(cr, x - arrow_distance, y + capsule_height / 2);
+      cairo_line_to(cr, x, y + capsule_height / 2);
       cairo_stroke(cr);
 
-      // Draw arrowhead
-      cairo_move_to(cr, x, y + 20);
-      cairo_line_to(cr, x - 10, y + 15);
-      cairo_line_to(cr, x - 10, y + 25);
+      cairo_move_to(cr, x, y + capsule_height / 2);
+      cairo_line_to(cr, x - 10, y + capsule_height / 2 - 5);
+      cairo_line_to(cr, x - 10, y + capsule_height / 2 + 5);
       cairo_close_path(cr);
       cairo_fill(cr);
     }
@@ -184,12 +212,14 @@ void on_search_button_clicked(GtkButton *button, gpointer user_data)
   if (result != NULL)
   {
     gchar message[100];
-    g_snprintf(message, sizeof(message), "THE NUMBER '%d' EXISTS IN THE LIST.", result->value);
+    g_snprintf(message, sizeof(message), "THE NUMBER %d EXISTS IN THE LIST", result->value);
     show_message(message);
   }
   else
   {
-    show_message("THE NUMBER DOES NOT EXIST IN THE LIST");
+    gchar message[100];
+    g_snprintf(message, sizeof(message), "THE NUMBER %d DOES NOT EXIST IN THE LIST", value);
+    show_message(message);
   }
 }
 
@@ -228,7 +258,7 @@ int main(int argc, char *argv[])
   gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 5);
 
   gtk_box_pack_start(GTK_BOX(hbox), entry_label, FALSE, FALSE, 5);
-  gtk_box_pack_start(GTK_BOX(hbox), entry, FALSE, FALSE, 5);
+  gtk_box_pack_start(GTK_BOX(hbox), entry, TRUE, TRUE, 5); // Expands horizontally
   gtk_box_pack_start(GTK_BOX(hbox), insert_button, FALSE, FALSE, 5);
   gtk_box_pack_start(GTK_BOX(hbox), delete_button, FALSE, FALSE, 5);
   gtk_box_pack_start(GTK_BOX(hbox), search_button, FALSE, FALSE, 5);
@@ -246,14 +276,14 @@ int main(int argc, char *argv[])
   g_signal_connect(entry, "activate", G_CALLBACK(clear_entry), NULL);
 
   // Set window size
-  gtk_window_set_default_size(GTK_WINDOW(window), 600, 400);
+  gtk_window_set_default_size(GTK_WINDOW(window), 800, 400);
 
   // Set window title
   gtk_window_set_title(GTK_WINDOW(window), "Linked List");
 
-  // Set light blue background using CSS
+  // Set background pattern using CSS
   GtkCssProvider *provider = gtk_css_provider_new();
-  const gchar *css = "window { background-color: #ADD8E6; }";
+  const gchar *css = "window { background: url('background.png') repeat; }";
   GError *error = NULL;
   gtk_css_provider_load_from_data(provider, css, -1, &error);
   gtk_style_context_add_provider_for_screen(gdk_screen_get_default(), GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
