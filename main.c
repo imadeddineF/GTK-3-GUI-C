@@ -93,7 +93,7 @@ void show_message(const gchar *message)
   gtk_widget_destroy(dialog);
 }
 
-void draw_capsule(GtkWidget *widget, cairo_t *cr, gint x, gint y, gint width, gint height, gchar *text)
+void draw_capsule(GtkWidget *widget, cairo_t *cr, gint x, gint y, gint width, gint height, gchar *text, gboolean is_head)
 {
   gint radius = height / 2;
 
@@ -122,7 +122,16 @@ void draw_capsule(GtkWidget *widget, cairo_t *cr, gint x, gint y, gint width, gi
   gint text_x = x + (width - rect.width) / 2;
   gint text_y = y + (height - rect.height) / 2;
 
-  cairo_set_source_rgb(cr, 0, 0, 0); // Black color for the text
+  // Set the text color
+  if (is_head)
+  {
+    cairo_set_source_rgb(cr, 0, 0.45, 0.73); // French Blue for head text
+  }
+  else
+  {
+    cairo_set_source_rgb(cr, 0, 0, 0); // Black color for the text
+  }
+
   cairo_move_to(cr, text_x, text_y);
   pango_cairo_show_layout(cr, layout);
   g_object_unref(layout);
@@ -136,13 +145,33 @@ void draw_linked_list(GtkWidget *widget, cairo_t *cr, gpointer user_data)
   gint capsule_height = 40;
   gint arrow_distance = 20;
 
+  // Draw tête node with an arrow pointing to the first node
+  if (current != NULL)
+  {
+    draw_capsule(widget, cr, x, y, capsule_width, capsule_height, "head", TRUE);
+
+    // Draw an arrow from head to the first node
+    cairo_set_source_rgb(cr, 0, 0.45, 0.73); // French Blue
+    cairo_move_to(cr, x + capsule_width, y + capsule_height / 2);
+    cairo_line_to(cr, x + capsule_width + arrow_distance, y + capsule_height / 2);
+    cairo_stroke(cr);
+
+    cairo_move_to(cr, x + capsule_width + arrow_distance, y + capsule_height / 2);
+    cairo_line_to(cr, x + capsule_width + arrow_distance - 10, y + capsule_height / 2 - 5);
+    cairo_line_to(cr, x + capsule_width + arrow_distance - 10, y + capsule_height / 2 + 5);
+    cairo_close_path(cr);
+    cairo_fill(cr);
+
+    x += capsule_width + arrow_distance;
+  }
+
   while (current != NULL)
   {
     gchar value_str[10];
 
     if (current->value >= 0 && current->value < 10)
     {
-      // Add leading zero for numbers 0 to 9
+      // Add a leading zero for numbers 0 to 9
       g_snprintf(value_str, sizeof(value_str), "0%d", current->value);
     }
     else
@@ -150,7 +179,7 @@ void draw_linked_list(GtkWidget *widget, cairo_t *cr, gpointer user_data)
       g_snprintf(value_str, sizeof(value_str), "%d", current->value);
     }
 
-    draw_capsule(widget, cr, x, y, strlen(value_str) * 10 + 20, capsule_height, value_str);
+    draw_capsule(widget, cr, x, y, strlen(value_str) * 10 + 20, capsule_height, value_str, FALSE);
 
     x += strlen(value_str) * 10 + 20 + arrow_distance;
 
