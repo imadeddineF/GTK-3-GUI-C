@@ -258,6 +258,22 @@ void on_sort_button_clicked(GtkButton *button, gpointer user_data)
   gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
 }
 
+void clear_list()
+{
+  while (head != NULL)
+  {
+    Node *temp = head;
+    head = head->next;
+    g_free(temp);
+  }
+}
+
+void on_clear_button_clicked(GtkButton *button, gpointer user_data)
+{
+  clear_list();
+  gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
+}
+
 int main(int argc, char *argv[])
 {
   gtk_init(&argc, &argv);
@@ -272,6 +288,7 @@ int main(int argc, char *argv[])
   GtkWidget *delete_button = gtk_button_new_with_label("Delete");
   GtkWidget *search_button = gtk_button_new_with_label("Search");
   GtkWidget *sort_button = gtk_button_new_with_label("Sort");
+  GtkWidget *clear_button = gtk_button_new_with_label("Clear");
 
   GtkWidget *entry = gtk_entry_new();
   GtkWidget *entry_label = gtk_label_new("Enter value:");
@@ -292,6 +309,7 @@ int main(int argc, char *argv[])
   gtk_box_pack_start(GTK_BOX(hbox), delete_button, FALSE, FALSE, 5);
   gtk_box_pack_start(GTK_BOX(hbox), search_button, FALSE, FALSE, 5);
   gtk_box_pack_start(GTK_BOX(hbox), sort_button, FALSE, FALSE, 5);
+  gtk_box_pack_start(GTK_BOX(hbox), clear_button, FALSE, FALSE, 5);
 
   // Set data for entry and drawing area to be accessed in the callback
   g_object_set_data(G_OBJECT(drawing_area), "entry", entry);
@@ -301,6 +319,7 @@ int main(int argc, char *argv[])
   g_signal_connect(delete_button, "clicked", G_CALLBACK(on_delete_button_clicked), drawing_area);
   g_signal_connect(search_button, "clicked", G_CALLBACK(on_search_button_clicked), drawing_area);
   g_signal_connect(sort_button, "clicked", G_CALLBACK(on_sort_button_clicked), drawing_area);
+  g_signal_connect(clear_button, "clicked", G_CALLBACK(on_clear_button_clicked), drawing_area);
 
   g_signal_connect(entry, "activate", G_CALLBACK(clear_entry), NULL);
 
