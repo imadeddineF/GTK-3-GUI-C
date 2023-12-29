@@ -9,6 +9,7 @@ typedef struct Node
 Node *head = NULL;
 
 void delete_node_head();
+void delete_node_tail(); // Function prototype for delete_node_tail
 
 void add_node(int value)
 {
@@ -238,6 +239,12 @@ void on_delete_head_button_clicked(GtkButton *button, gpointer user_data)
   gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
 }
 
+void on_delete_tail_button_clicked(GtkButton *button, gpointer user_data)
+{
+  delete_node_tail(); // Call the function to delete the tail
+  gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
+}
+
 void delete_node_head()
 {
   if (head != NULL)
@@ -245,6 +252,33 @@ void delete_node_head()
     Node *temp = head;
     head = head->next;
     g_free(temp);
+  }
+}
+
+void delete_node_tail()
+{
+  if (head != NULL)
+  {
+    Node *current = head;
+    Node *prev = NULL;
+
+    while (current->next != NULL)
+    {
+      prev = current;
+      current = current->next;
+    }
+
+    if (prev != NULL)
+    {
+      prev->next = NULL;
+      g_free(current);
+    }
+    else
+    {
+      // If there's only one node, remove it
+      g_free(current);
+      head = NULL;
+    }
   }
 }
 
@@ -293,6 +327,7 @@ void on_clear_button_clicked(GtkButton *button, gpointer user_data)
 }
 
 void delete_node_head(); // Function prototype
+void delete_node_tail(); // Function prototype
 
 int main(int argc, char *argv[])
 {
@@ -307,6 +342,7 @@ int main(int argc, char *argv[])
   GtkWidget *insert_button = gtk_button_new_with_label("Insert");
   GtkWidget *delete_button = gtk_button_new_with_label("Delete");
   GtkWidget *delete_head_button = gtk_button_new_with_label("Delete Head");
+  GtkWidget *delete_tail_button = gtk_button_new_with_label("Delete Tail"); // New button for deleting tail
   GtkWidget *search_button = gtk_button_new_with_label("Search");
   GtkWidget *sort_button = gtk_button_new_with_label("Sort");
   GtkWidget *clear_button = gtk_button_new_with_label("Clear");
@@ -329,6 +365,7 @@ int main(int argc, char *argv[])
   gtk_box_pack_start(GTK_BOX(hbox), insert_button, FALSE, FALSE, 5);
   gtk_box_pack_start(GTK_BOX(hbox), delete_button, FALSE, FALSE, 5);
   gtk_box_pack_start(GTK_BOX(hbox), delete_head_button, FALSE, FALSE, 5);
+  gtk_box_pack_start(GTK_BOX(hbox), delete_tail_button, FALSE, FALSE, 5); // Added delete_tail_button
   gtk_box_pack_start(GTK_BOX(hbox), search_button, FALSE, FALSE, 5);
   gtk_box_pack_start(GTK_BOX(hbox), sort_button, FALSE, FALSE, 5);
   gtk_box_pack_start(GTK_BOX(hbox), clear_button, FALSE, FALSE, 5);
@@ -340,6 +377,7 @@ int main(int argc, char *argv[])
   g_signal_connect(insert_button, "clicked", G_CALLBACK(on_insert_button_clicked), drawing_area);
   g_signal_connect(delete_button, "clicked", G_CALLBACK(on_delete_button_clicked), drawing_area);
   g_signal_connect(delete_head_button, "clicked", G_CALLBACK(on_delete_head_button_clicked), drawing_area);
+  g_signal_connect(delete_tail_button, "clicked", G_CALLBACK(on_delete_tail_button_clicked), drawing_area); // Connect delete_tail_button to callback
   g_signal_connect(search_button, "clicked", G_CALLBACK(on_search_button_clicked), drawing_area);
   g_signal_connect(sort_button, "clicked", G_CALLBACK(on_sort_button_clicked), drawing_area);
   g_signal_connect(clear_button, "clicked", G_CALLBACK(on_clear_button_clicked), drawing_area);
@@ -347,7 +385,7 @@ int main(int argc, char *argv[])
   g_signal_connect(entry, "activate", G_CALLBACK(clear_entry), NULL);
 
   // Set window size
-  gtk_window_set_default_size(GTK_WINDOW(window), 800, 400);
+  gtk_window_set_default_size(GTK_WINDOW(window), 1000, 600);
 
   // Set window title
   gtk_window_set_title(GTK_WINDOW(window), "Linked List");
