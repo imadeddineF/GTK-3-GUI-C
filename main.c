@@ -9,7 +9,7 @@ typedef struct Node
 Node *head = NULL;
 
 void delete_node_head();
-void delete_node_tail(); // Function prototype for delete_node_tail
+void delete_node_tail();
 
 void add_node(int value)
 {
@@ -326,8 +326,8 @@ void on_clear_button_clicked(GtkButton *button, gpointer user_data)
   gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
 }
 
-void delete_node_head(); // Function prototype
-void delete_node_tail(); // Function prototype
+void delete_node_head();
+void delete_node_tail();
 
 int main(int argc, char *argv[])
 {
