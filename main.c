@@ -86,6 +86,41 @@ void selection_sort()
   }
 }
 
+
+void insertion_sort()
+{
+    if (head == NULL || head->next == NULL)
+        return;
+
+    Node *sorted = NULL;
+    Node *current = head;
+
+    while (current != NULL)
+    {
+        Node *next = current->next;
+
+        if (sorted == NULL || sorted->value >= current->value)
+        {
+            current->next = sorted;
+            sorted = current;
+        }
+        else
+        {
+            Node *temp = sorted;
+            while (temp->next != NULL && temp->next->value < current->value)
+            {
+                temp = temp->next;
+            }
+            current->next = temp->next;
+            temp->next = current;
+        }
+
+        current = next;
+    }
+
+    head = sorted;
+}
+
 void show_message(const gchar *message)
 {
   GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "%s", message);
