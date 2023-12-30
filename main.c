@@ -89,39 +89,38 @@ void selection_sort()
   }
 }
 
-
 void insertion_sort()
 {
-    if (head == NULL || head->next == NULL)
-        return;
+  if (head == NULL || head->next == NULL)
+    return;
 
-    Node *sorted = NULL;
-    Node *current = head;
+  Node *sorted = NULL;
+  Node *current = head;
 
-    while (current != NULL)
+  while (current != NULL)
+  {
+    Node *next = current->next;
+
+    if (sorted == NULL || sorted->value >= current->value)
     {
-        Node *next = current->next;
-
-        if (sorted == NULL || sorted->value >= current->value)
-        {
-            current->next = sorted;
-            sorted = current;
-        }
-        else
-        {
-            Node *temp = sorted;
-            while (temp->next != NULL && temp->next->value < current->value)
-            {
-                temp = temp->next;
-            }
-            current->next = temp->next;
-            temp->next = current;
-        }
-
-        current = next;
+      current->next = sorted;
+      sorted = current;
+    }
+    else
+    {
+      Node *temp = sorted;
+      while (temp->next != NULL && temp->next->value < current->value)
+      {
+        temp = temp->next;
+      }
+      current->next = temp->next;
+      temp->next = current;
     }
 
-    head = sorted;
+    current = next;
+  }
+
+  head = sorted;
 }
 
 void show_message(const gchar *message)
@@ -360,9 +359,6 @@ void on_clear_button_clicked(GtkButton *button, gpointer user_data)
   clear_list();
   gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
 }
-
-void delete_node_head();
-void delete_node_tail();
 
 int main(int argc, char *argv[])
 {
