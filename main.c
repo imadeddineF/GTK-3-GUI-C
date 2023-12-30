@@ -121,6 +121,33 @@ void insertion_sort()
     head = sorted;
 }
 
+bool delete_node_after_value(int target_value) {
+    Node *current = head;
+    Node *prev = NULL;
+
+    
+    while (current != NULL && current->value != target_value) {
+        prev = current;
+        current = current->next;
+    }
+
+    
+    if (current != NULL && current->next != NULL) {
+        Node *node_to_delete = current->next;
+        current->next = node_to_delete->next; 
+        if (node_to_delete == head) {
+            head = node_to_delete->next;
+        }
+
+        free(node_to_delete);
+        return true; 
+    }
+
+    return false; 
+}
+
+
+
 void show_message(const gchar *message)
 {
   GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "%s", message);
