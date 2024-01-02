@@ -33,6 +33,52 @@ void add_node(int value)
   last->next = new_node;
 }
 
+void add_node_at_head(int value)
+{
+  Node *new_node = (Node *)g_malloc(sizeof(Node));
+  new_node->value = value;
+
+  if (head == NULL)
+  {
+    new_node->next = NULL;
+    head = new_node;
+  }
+  else
+  {
+    new_node->next = head;
+    head = new_node;
+  }
+}
+
+void add_node_before_value(int new_value, int target_value)
+{
+  Node *new_node = (Node *)g_malloc(sizeof(Node));
+  new_node->value = new_value;
+
+  Node *current = head;
+  Node *prev = NULL;
+
+  while (current != NULL && current->value != target_value)
+  {
+    prev = current;
+    current = current->next;
+  }
+
+  if (current != NULL)
+  {
+    if (prev != NULL)
+    {
+      new_node->next = current;
+      prev->next = new_node;
+    }
+    else
+    {
+      new_node->next = head;
+      head = new_node;
+    }
+  }
+}
+
 void delete_node(int value)
 {
   Node *current = head;
@@ -57,6 +103,73 @@ void delete_node(int value)
 
     g_free(current);
   }
+}
+
+void delete_node_head();
+void delete_node_tail();
+
+void delete_node_head()
+{
+  if (head != NULL)
+  {
+    Node *temp = head;
+    head = head->next;
+    g_free(temp);
+  }
+}
+
+void delete_node_tail()
+{
+  if (head != NULL)
+  {
+    Node *current = head;
+    Node *prev = NULL;
+
+    while (current->next != NULL)
+    {
+      prev = current;
+      current = current->next;
+    }
+
+    if (prev != NULL)
+    {
+      prev->next = NULL;
+      g_free(current);
+    }
+    else
+    {
+      // If there's only one node, remove it
+      g_free(current);
+      head = NULL;
+    }
+  }
+}
+
+bool delete_node_after_value(int target_value)
+{
+  Node *current = head;
+  Node *prev = NULL;
+
+  while (current != NULL && current->value != target_value)
+  {
+    prev = current;
+    current = current->next;
+  }
+
+  if (current != NULL && current->next != NULL)
+  {
+    Node *node_to_delete = current->next;
+    current->next = node_to_delete->next;
+    if (node_to_delete == head)
+    {
+      head = node_to_delete->next;
+    }
+
+    g_free(node_to_delete);
+    return true;
+  }
+
+  return false;
 }
 
 Node *search_node(int value)
@@ -149,6 +262,35 @@ bool delete_node_after_value(int target_value)
   }
 
   return false;
+}
+
+void bubble_sort()
+{
+  int swapped;
+  Node *ptr1;
+  Node *lptr = NULL;
+
+  if (head == NULL)
+    return;
+
+  do
+  {
+    swapped = 0;
+    ptr1 = head;
+
+    while (ptr1->next != lptr)
+    {
+      if (ptr1->value > ptr1->next->value)
+      {
+        int temp = ptr1->value;
+        ptr1->value = ptr1->next->value;
+        ptr1->next->value = temp;
+        swapped = 1;
+      }
+      ptr1 = ptr1->next;
+    }
+    lptr = ptr1;
+  } while (swapped);
 }
 
 void show_message(const gchar *message)
