@@ -35,6 +35,7 @@ void add_node(int value)
 
 void add_node_at_head(int value)
 {
+
   Node *new_node = (Node *)g_malloc(sizeof(Node));
   new_node->value = value;
 
@@ -233,6 +234,36 @@ void insertion_sort()
 
     current = next;
   }
+
+void bubble_sort()
+{
+    int swapped;
+    Node *ptr1;
+    Node *lptr = NULL;
+
+    if (head == NULL)
+        return;
+
+    do
+    {
+        swapped = 0;
+        ptr1 = head;
+
+        while (ptr1->next != lptr)
+        {
+            if (ptr1->value > ptr1->next->value)
+            {
+                int temp = ptr1->value;
+                ptr1->value = ptr1->next->value;
+                ptr1->next->value = temp;
+                swapped = 1;
+            }
+            ptr1 = ptr1->next;
+        }
+        lptr = ptr1;
+    } while (swapped);
+}
+
 
   head = sorted;
 }
