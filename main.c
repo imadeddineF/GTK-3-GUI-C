@@ -1,4 +1,5 @@
 #include <gtk/gtk.h>
+#include <stdbool.h>
 
 typedef struct Node
 {
@@ -7,6 +8,9 @@ typedef struct Node
 } Node;
 
 Node *head = NULL;
+
+void delete_node_head();
+void delete_node_tail();
 
 void add_node(int value)
 {
@@ -31,48 +35,49 @@ void add_node(int value)
 
 void add_node_at_head(int value)
 {
-    Node *new_node = (Node *)g_malloc(sizeof(Node));
-    new_node->value = value;
 
-    if (head == NULL)
-    {
-        new_node->next = NULL;
-        head = new_node;
-    }
-    else
-    {
-        new_node->next = head;
-        head = new_node;
-    }
+  Node *new_node = (Node *)g_malloc(sizeof(Node));
+  new_node->value = value;
+
+  if (head == NULL)
+  {
+    new_node->next = NULL;
+    head = new_node;
+  }
+  else
+  {
+    new_node->next = head;
+    head = new_node;
+  }
 }
 
 void add_node_before_value(int new_value, int target_value)
 {
-    Node *new_node = (Node *)g_malloc(sizeof(Node));
-    new_node->value = new_value;
+  Node *new_node = (Node *)g_malloc(sizeof(Node));
+  new_node->value = new_value;
 
-    Node *current = head;
-    Node *prev = NULL;
+  Node *current = head;
+  Node *prev = NULL;
 
-    while (current != NULL && current->value != target_value)
+  while (current != NULL && current->value != target_value)
+  {
+    prev = current;
+    current = current->next;
+  }
+
+  if (current != NULL)
+  {
+    if (prev != NULL)
     {
-        prev = current;
-        current = current->next;
+      new_node->next = current;
+      prev->next = new_node;
     }
-
-    if (current != NULL)
+    else
     {
-        if (prev != NULL)
-        {
-            new_node->next = current;
-            prev->next = new_node;
-        }
-        else
-        {
-            new_node->next = head;
-            head = new_node;
-        }
+      new_node->next = head;
+      head = new_node;
     }
+  }
 }
 
 void delete_node(int value)
@@ -142,29 +147,30 @@ void delete_node_tail()
 }
 
 bool delete_node_after_value(int target_value)
- {
-    Node *current = head;
-    Node *prev = NULL;
+{
+  Node *current = head;
+  Node *prev = NULL;
 
+  while (current != NULL && current->value != target_value)
+  {
+    prev = current;
+    current = current->next;
+  }
 
-    while (current != NULL && current->value != target_value) {
-        prev = current;
-        current = current->next;
+  if (current != NULL && current->next != NULL)
+  {
+    Node *node_to_delete = current->next;
+    current->next = node_to_delete->next;
+    if (node_to_delete == head)
+    {
+      head = node_to_delete->next;
     }
 
+    g_free(node_to_delete);
+    return true;
+  }
 
-    if (current != NULL && current->next != NULL) {
-        Node *node_to_delete = current->next;
-        current->next = node_to_delete->next; 
-        if (node_to_delete == head) {
-            head = node_to_delete->next;
-        }
-
-        g_free(node_to_delete);
-        return true; 
-    }
-
-    return false; 
+  return false;
 }
 
 Node *search_node(int value)
@@ -198,40 +204,36 @@ void selection_sort()
   }
 }
 
-
 void insertion_sort()
 {
-    if (head == NULL || head->next == NULL)
-        return;
+  if (head == NULL || head->next == NULL)
+    return;
 
-    Node *sorted = NULL;
-    Node *current = head;
+  Node *sorted = NULL;
+  Node *current = head;
 
-    while (current != NULL)
+  while (current != NULL)
+  {
+    Node *next = current->next;
+
+    if (sorted == NULL || sorted->value >= current->value)
     {
-        Node *next = current->next;
-
-        if (sorted == NULL || sorted->value >= current->value)
-        {
-            current->next = sorted;
-            sorted = current;
-        }
-        else
-        {
-            Node *temp = sorted;
-            while (temp->next != NULL && temp->next->value < current->value)
-            {
-                temp = temp->next;
-            }
-            current->next = temp->next;
-            temp->next = current;
-        }
-
-        current = next;
+      current->next = sorted;
+      sorted = current;
+    }
+    else
+    {
+      Node *temp = sorted;
+      while (temp->next != NULL && temp->next->value < current->value)
+      {
+        temp = temp->next;
+      }
+      current->next = temp->next;
+      temp->next = current;
     }
 
-    head = sorted;
-}
+    current = next;
+  }
 
 void bubble_sort()
 {
@@ -263,8 +265,64 @@ void bubble_sort()
 }
 
 
+  head = sorted;
+}
 
+bool delete_node_after_value(int target_value)
+{
+  Node *current = head;
+  Node *prev = NULL;
 
+  while (current != NULL && current->value != target_value)
+  {
+    prev = current;
+    current = current->next;
+  }
+
+  if (current != NULL && current->next != NULL)
+  {
+    Node *node_to_delete = current->next;
+    current->next = node_to_delete->next;
+    if (node_to_delete == head)
+    {
+      head = node_to_delete->next;
+    }
+
+    free(node_to_delete);
+    return true;
+  }
+
+  return false;
+}
+
+void bubble_sort()
+{
+  int swapped;
+  Node *ptr1;
+  Node *lptr = NULL;
+
+  if (head == NULL)
+    return;
+
+  do
+  {
+    swapped = 0;
+    ptr1 = head;
+
+    while (ptr1->next != lptr)
+    {
+      if (ptr1->value > ptr1->next->value)
+      {
+        int temp = ptr1->value;
+        ptr1->value = ptr1->next->value;
+        ptr1->next->value = temp;
+        swapped = 1;
+      }
+      ptr1 = ptr1->next;
+    }
+    lptr = ptr1;
+  } while (swapped);
+}
 
 void show_message(const gchar *message)
 {
@@ -410,6 +468,55 @@ void on_delete_button_clicked(GtkButton *button, gpointer user_data)
   gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
 }
 
+void on_delete_head_button_clicked(GtkButton *button, gpointer user_data)
+{
+  delete_node_head(); // Call the function to delete the head
+  gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
+}
+
+void on_delete_tail_button_clicked(GtkButton *button, gpointer user_data)
+{
+  delete_node_tail(); // Call the function to delete the tail
+  gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
+}
+
+void delete_node_head()
+{
+  if (head != NULL)
+  {
+    Node *temp = head;
+    head = head->next;
+    g_free(temp);
+  }
+}
+
+void delete_node_tail()
+{
+  if (head != NULL)
+  {
+    Node *current = head;
+    Node *prev = NULL;
+
+    while (current->next != NULL)
+    {
+      prev = current;
+      current = current->next;
+    }
+
+    if (prev != NULL)
+    {
+      prev->next = NULL;
+      g_free(current);
+    }
+    else
+    {
+      // If there's only one node, remove it
+      g_free(current);
+      head = NULL;
+    }
+  }
+}
+
 void on_search_button_clicked(GtkButton *button, gpointer user_data)
 {
   GtkWidget *entry = GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "entry"));
@@ -466,6 +573,8 @@ int main(int argc, char *argv[])
 
   GtkWidget *insert_button = gtk_button_new_with_label("Insert");
   GtkWidget *delete_button = gtk_button_new_with_label("Delete");
+  GtkWidget *delete_head_button = gtk_button_new_with_label("Delete Head");
+  GtkWidget *delete_tail_button = gtk_button_new_with_label("Delete Tail"); // New button for deleting tail
   GtkWidget *search_button = gtk_button_new_with_label("Search");
   GtkWidget *sort_button = gtk_button_new_with_label("Sort");
   GtkWidget *clear_button = gtk_button_new_with_label("Clear");
@@ -487,6 +596,8 @@ int main(int argc, char *argv[])
   gtk_box_pack_start(GTK_BOX(hbox), entry, TRUE, TRUE, 5); // Expands horizontally
   gtk_box_pack_start(GTK_BOX(hbox), insert_button, FALSE, FALSE, 5);
   gtk_box_pack_start(GTK_BOX(hbox), delete_button, FALSE, FALSE, 5);
+  gtk_box_pack_start(GTK_BOX(hbox), delete_head_button, FALSE, FALSE, 5);
+  gtk_box_pack_start(GTK_BOX(hbox), delete_tail_button, FALSE, FALSE, 5); // Added delete_tail_button
   gtk_box_pack_start(GTK_BOX(hbox), search_button, FALSE, FALSE, 5);
   gtk_box_pack_start(GTK_BOX(hbox), sort_button, FALSE, FALSE, 5);
   gtk_box_pack_start(GTK_BOX(hbox), clear_button, FALSE, FALSE, 5);
@@ -497,6 +608,8 @@ int main(int argc, char *argv[])
 
   g_signal_connect(insert_button, "clicked", G_CALLBACK(on_insert_button_clicked), drawing_area);
   g_signal_connect(delete_button, "clicked", G_CALLBACK(on_delete_button_clicked), drawing_area);
+  g_signal_connect(delete_head_button, "clicked", G_CALLBACK(on_delete_head_button_clicked), drawing_area);
+  g_signal_connect(delete_tail_button, "clicked", G_CALLBACK(on_delete_tail_button_clicked), drawing_area); // Connect delete_tail_button to callback
   g_signal_connect(search_button, "clicked", G_CALLBACK(on_search_button_clicked), drawing_area);
   g_signal_connect(sort_button, "clicked", G_CALLBACK(on_sort_button_clicked), drawing_area);
   g_signal_connect(clear_button, "clicked", G_CALLBACK(on_clear_button_clicked), drawing_area);
@@ -504,7 +617,7 @@ int main(int argc, char *argv[])
   g_signal_connect(entry, "activate", G_CALLBACK(clear_entry), NULL);
 
   // Set window size
-  gtk_window_set_default_size(GTK_WINDOW(window), 800, 400);
+  gtk_window_set_default_size(GTK_WINDOW(window), 1000, 600);
 
   // Set window title
   gtk_window_set_title(GTK_WINDOW(window), "Linked List");
