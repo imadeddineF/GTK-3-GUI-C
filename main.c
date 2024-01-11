@@ -17,7 +17,7 @@ const gchar *css_style =
     "  border-radius: 10px;"
     "  padding: 5px 10px;"
     "  font-size: 14px;"
-    "  transition: background-color 0.2s, color 0.2s;"
+    "  transition: background-color 0.3s, color 0.3s;"
     "}"
 
     "button:hover {"
@@ -36,10 +36,22 @@ const gchar *css_style =
     "  color: #000000;"
     "  font-size: 16px;"
     "  background-color: #ffffff;"
+    "  transition: border-color 0.3s;"
     "}"
 
     "entry:focus {"
     "  border-color: #2980b9;"
+    "}"
+
+    // Additional styles for animation during search
+    "entry.searching {"
+    "  border-color: #f39c12 !important;"
+    "  transition: border-color 0.5s;"
+    "}"
+
+    "node.found {"
+    "  fill: #27ae60 !important;"  // Green color for found node
+    "  transition: fill 0.5s;"
     "}";
 
 gboolean animate(GtkWidget *widget);
@@ -129,17 +141,21 @@ int main(int argc, char *argv[]) {
   gtk_main();
   return 0;
 }
-
-// Function definitions
+// Function to add a new node with the given value to the end of the linked list
 void add_node(int value) {
+  // Create a new node and allocate memory for it
   Node *new_node = g_malloc(sizeof(Node));
   new_node->value = value;
   new_node->next = NULL;
   initialize_opacity(new_node);  // Initialize opacity for the new node
+
+  // If the list is empty, make the new node the head
   if (head == NULL) {
     head = new_node;
     return;
   }
+
+  // Traverse to the end of the list and add the new node
   Node *last = head;
   while (last->next != NULL) {
     last = last->next;
@@ -147,27 +163,39 @@ void add_node(int value) {
   last->next = new_node;
 }
 
+// Function to add a new node with the given value at the head of the linked list
 void add_node_at_head(int value) {
+  // Create a new node and allocate memory for it
   Node *new_node = (Node *)g_malloc(sizeof(Node));
   new_node->value = value;
+
+  // If the list is empty, make the new node the head
   if (head == NULL) {
     new_node->next = NULL;
     head = new_node;
   } else {
+    // Make the new node the head and update the next pointer
     new_node->next = head;
     head = new_node;
   }
 }
 
+// Function to add a new node with the given value before a node with the target value
 void add_node_before_value(int new_value, int target_value) {
+  // Create a new node and allocate memory for it
   Node *new_node = (Node *)g_malloc(sizeof(Node));
   new_node->value = new_value;
+
   Node *current = head;
   Node *prev = NULL;
+
+  // Traverse the list to find the node with the target value
   while (current != NULL && current->value != target_value) {
     prev = current;
     current = current->next;
   }
+
+  // If the target value is found, insert the new node before it
   if (current != NULL) {
     if (prev != NULL) {
       new_node->next = current;
@@ -179,14 +207,18 @@ void add_node_before_value(int new_value, int target_value) {
   }
 }
 
+// Function to delete a node with the given value from the linked list
 void delete_node(int value) {
   Node *current = head;
   Node *prev = NULL;
 
+  // Traverse the list to find the node with the target value
   while (current != NULL && current->value != value) {
     prev = current;
     current = current->next;
   }
+
+  // If the target value is found, delete the node
   if (current != NULL) {
     if (prev != NULL) {
       prev->next = current->next;
@@ -197,19 +229,27 @@ void delete_node(int value) {
   }
 }
 
+// Function to search for a node with the given value in the linked list
 Node *search_node(int value) {
   Node *current = head;
+
+  // Traverse the list to find the node with the target value
   while (current != NULL && current->value != value) {
     current = current->next;
   }
+
   return current;
 }
 
+// Function to sort the linked list using the selection sort algorithm
 void selection_sort() {
   Node *i, *j;
   int temp;
+
+  // Iterate over the list and compare each pair of nodes
   for (i = head; i != NULL; i = i->next) {
     for (j = i->next; j != NULL; j = j->next) {
+      // Swap the values if the current node is greater than the next node
       if (i->value > j->value) {
         temp = i->value;
         i->value = j->value;
@@ -219,17 +259,24 @@ void selection_sort() {
   }
 }
 
+// Function to sort the linked list using the insertion sort algorithm
 void insertion_sort() {
+  // If the list is empty or has only one node, no sorting is required
   if (head == NULL || head->next == NULL)
     return;
+
   Node *sorted = NULL;
   Node *current = head;
+
+  // Iterate over the list and insert each node into the sorted portion of the list
   while (current != NULL) {
     Node *next = current->next;
     if (sorted == NULL || sorted->value >= current->value) {
+      // Insert the current node at the beginning of the sorted list
       current->next = sorted;
       sorted = current;
     } else {
+      // Find the correct position to insert the current node in the sorted list
       Node *temp = sorted;
       while (temp->next != NULL && temp->next->value < current->value) {
         temp = temp->next;
@@ -239,19 +286,23 @@ void insertion_sort() {
     }
     current = next;
   }
-  head = sorted;
+  head = sorted;  // Update the head of the list
 }
 
+// Function to sort the linked list using the bubble sort algorithm
 void bubble_sort() {
   int swapped;
   Node *ptr1;
   Node *lptr = NULL;
+
+  // Iterate over the list and compare each pair of adjacent nodes
   if (head == NULL)
     return;
   do {
     swapped = 0;
     ptr1 = head;
     while (ptr1->next != lptr) {
+      // Swap the values if the current node is greater than the next node
       if (ptr1->value > ptr1->next->value) {
         int temp = ptr1->value;
         ptr1->value = ptr1->next->value;
@@ -264,6 +315,7 @@ void bubble_sort() {
   } while (swapped);
 }
 
+// Function to delete the head node from the linked list
 void delete_node_head() {
   if (head != NULL) {
     Node *temp = head;
@@ -272,14 +324,19 @@ void delete_node_head() {
   }
 }
 
+// Function to delete the tail node from the linked list
 void delete_node_tail() {
   if (head != NULL) {
     Node *current = head;
     Node *prev = NULL;
+
+    // Traverse the list to find the tail node
     while (current->next != NULL) {
       prev = current;
       current = current->next;
     }
+
+    // Delete the tail node
     if (prev != NULL) {
       prev->next = NULL;
       g_free(current);
@@ -290,13 +347,18 @@ void delete_node_tail() {
   }
 }
 
+// Function to delete the node after a node with the target value from the linked list
 bool delete_node_after_value(int target_value) {
   Node *current = head;
   Node *prev = NULL;
+
+  // Traverse the list to find the node with the target value
   while (current != NULL && current->value != target_value) {
     prev = current;
     current = current->next;
   }
+
+  // If the target value is found and there is a node after it, delete the next node
   if (current != NULL && current->next != NULL) {
     Node *node_to_delete = current->next;
     current->next = node_to_delete->next;
@@ -309,15 +371,17 @@ bool delete_node_after_value(int target_value) {
   return false;
 }
 
+// Function to display a message dialog with the given message
 void show_message(const gchar *message) {
   GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "%s", message);
   gtk_dialog_run(GTK_DIALOG(dialog));
   gtk_widget_destroy(dialog);
 }
 
+// Function to draw a capsule shape with the given properties
 void draw_capsule(GtkWidget *widget, cairo_t *cr, gint x, gint y, gint width, gint height, gchar *text, gboolean is_head) {
-  gint radius = height / 2;
   // Draw the capsule frame
+  gint radius = height / 2;
   cairo_set_source_rgb(cr, 0, 0.45, 0.73);  // French Blue for frame
   cairo_move_to(cr, x + radius, y);
   cairo_line_to(cr, x + width - radius, y);
@@ -329,6 +393,7 @@ void draw_capsule(GtkWidget *widget, cairo_t *cr, gint x, gint y, gint width, gi
   cairo_line_to(cr, x, y + radius);
   cairo_arc(cr, x + radius, y + radius, radius, G_PI, 3 * G_PI / 2);
   cairo_stroke_preserve(cr);
+
   // Set a background color
   cairo_set_source_rgb(cr, 0.69, 0.88, 0.9);  // Baby Blue for fill
   cairo_fill(cr);
@@ -353,6 +418,7 @@ void draw_capsule(GtkWidget *widget, cairo_t *cr, gint x, gint y, gint width, gi
   g_object_unref(layout);
 }
 
+// Function to draw the linked list on a drawing area widget
 void draw_linked_list(GtkWidget *widget, cairo_t *cr, gpointer user_data) {
   Node *current = head;
   gint x = 50, y = 50;
@@ -360,7 +426,7 @@ void draw_linked_list(GtkWidget *widget, cairo_t *cr, gpointer user_data) {
   gint capsule_height = 40;
   gint arrow_distance = 20;
 
-  // Draw tête node with an arrow pointing to the first node
+  // Draw the head node with an arrow pointing to the first node
   if (current != NULL) {
     draw_capsule(widget, cr, x, y, capsule_width, capsule_height, "head", TRUE);
     // Draw an arrow from head to the first node
@@ -375,6 +441,8 @@ void draw_linked_list(GtkWidget *widget, cairo_t *cr, gpointer user_data) {
     cairo_fill(cr);
     x += capsule_width + arrow_distance;
   }
+
+  // Draw the remaining nodes in the linked list
   while (current != NULL) {
     gchar value_str[10];
     if (current->value >= 0 && current->value < 10) {
@@ -402,6 +470,7 @@ void draw_linked_list(GtkWidget *widget, cairo_t *cr, gpointer user_data) {
     }
     current = current->next;
   }
+
   // Add animation for capsule movement
   static gint animation_step = 0;
   if (animation_step < x) {
@@ -411,6 +480,7 @@ void draw_linked_list(GtkWidget *widget, cairo_t *cr, gpointer user_data) {
   }
 }
 
+// Function to animate the opacity of the nodes in the linked list
 gboolean animate(GtkWidget *widget) {
   Node *current = head;
   while (current != NULL) {
@@ -423,14 +493,17 @@ gboolean animate(GtkWidget *widget) {
   return G_SOURCE_CONTINUE;
 }
 
+// Function to initialize the opacity of a node to 0.0
 void initialize_opacity(Node *node) {
   node->opacity = 0.0;
 }
 
+// Function to clear the text entry widget
 void clear_entry(GtkEntry *entry, gpointer user_data) {
   gtk_entry_set_text(entry, "");
 }
 
+// Event handler for the insert button click event
 void on_insert_button_clicked(GtkButton *button, gpointer user_data) {
   GtkWidget *entry = GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "entry"));
   const gchar *text = gtk_entry_get_text(GTK_ENTRY(entry));
@@ -440,6 +513,7 @@ void on_insert_button_clicked(GtkButton *button, gpointer user_data) {
   gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
 }
 
+// Event handler for the delete button click event
 void on_delete_button_clicked(GtkButton *button, gpointer user_data) {
   GtkWidget *entry = GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "entry"));
   const gchar *text = gtk_entry_get_text(GTK_ENTRY(entry));
@@ -449,37 +523,84 @@ void on_delete_button_clicked(GtkButton *button, gpointer user_data) {
   gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
 }
 
+// Event handler for the delete head button click event
 void on_delete_head_button_clicked(GtkButton *button, gpointer user_data) {
   delete_node_head();  // Call the function to delete the head
   gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
 }
 
+// Event handler for the delete tail button click event
 void on_delete_tail_button_clicked(GtkButton *button, gpointer user_data) {
   delete_node_tail();  // Call the function to delete the tail
   gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
 }
 
+// Event handler for the search button click event
 void on_search_button_clicked(GtkButton *button, gpointer user_data) {
   GtkWidget *entry = GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "entry"));
   const gchar *text = gtk_entry_get_text(GTK_ENTRY(entry));
   int value = atoi(text);
-  Node *result = search_node(value);
-  if (result != NULL) {
+
+  // Set a flag to indicate the searching state
+  gboolean searching = TRUE;
+
+  Node *current = head;
+  gboolean found = FALSE;
+
+  // Traverse the list to find the node with the target value
+  while (current != NULL) {
+    if (current->value == value) {
+      found = TRUE;
+
+      // Remove the searching style from the entry
+      GtkStyleContext *context = gtk_widget_get_style_context(entry);
+      gtk_style_context_remove_class(context, "searching");
+
+      // Apply found style to the found node
+      gchar node_name[20];
+      g_snprintf(node_name, sizeof(node_name), "node-%d", current->value);
+      GtkWidget *drawing_area = GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area"));
+      gtk_widget_set_name(gtk_bin_get_child(GTK_BIN(drawing_area)), "");  // Remove existing node style
+      gtk_widget_set_name(gtk_bin_get_child(GTK_BIN(drawing_area)), node_name);
+      break;
+    }
+
+    // Perform animation for the current node
+    current->opacity = 0.0;
+    gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
+    g_usleep(100000);  // Sleep for 100,000 microseconds (0.1 seconds)
+
+    current = current->next;
+  }
+
+  // Display the result based on the search outcome
+  if (found) {
+    // Element found
+    current->opacity = 1.0;  // Highlight the found node
+    gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
+    g_usleep(2000000);  // Sleep for 2,000,000 microseconds (2 seconds)
+
     gchar message[100];
-    g_snprintf(message, sizeof(message), "THE NUMBER %d EXISTS IN THE LIST", result->value);
+    g_snprintf(message, sizeof(message), "THE NUMBER %d EXISTS IN THE LIST", current->value);
     show_message(message);
   } else {
+    // Element not found
     gchar message[100];
     g_snprintf(message, sizeof(message), "THE NUMBER %d DOES NOT EXIST IN THE LIST", value);
     show_message(message);
   }
+
+  // Reset the searching state flag
+  searching = FALSE;
 }
 
+// Event handler for the sort button click event
 void on_sort_button_clicked(GtkButton *button, gpointer user_data) {
   selection_sort();
   gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
 }
 
+// Function to clear the linked list
 void clear_list() {
   while (head != NULL) {
     Node *temp = head;
@@ -488,6 +609,7 @@ void clear_list() {
   }
 }
 
+// Event handler for the clear button click event
 void on_clear_button_clicked(GtkButton *button, gpointer user_data) {
   clear_list();
   gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
