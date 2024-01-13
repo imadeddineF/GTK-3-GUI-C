@@ -50,16 +50,17 @@ const gchar *css_style =
     "}"
 
     "node.found {"
-    "  fill: #27ae60 !important;"  // Green color for found node
-    "  transition: fill 0.5s;"
+    "  background-color: #27ae60;"  // Green color for found node
+    "  transition: fill 0.1s;"
     "}";
 
 gboolean animate(GtkWidget *widget);
 
 // Function declarations
 void add_node(int value);
+void create_list(int value);
 void add_node_at_head(int value);
-void add_node_before_value(int new_value, int target_value);
+void add_node_at_tail(int value);
 void delete_node(int value);
 bool delete_node_after_value(int target_value);
 Node *search_node(int value);
@@ -75,7 +76,9 @@ void initialize_opacity(Node *node);
 void draw_capsule(GtkWidget *widget, cairo_t *cr, gint x, gint y, gint width, gint height, gchar *text, gboolean is_head);
 void draw_linked_list(GtkWidget *widget, cairo_t *cr, gpointer user_data);
 void clear_entry(GtkEntry *entry, gpointer user_data);
-void on_insert_button_clicked(GtkButton *button, gpointer user_data);
+void on_create_list_button_clicked(GtkButton *button, gpointer user_data);
+void on_insert_head_button_clicked(GtkButton *button, gpointer user_data);
+void on_insert_tail_button_clicked(GtkButton *button, gpointer user_data);
 void on_delete_button_clicked(GtkButton *button, gpointer user_data);
 void on_delete_head_button_clicked(GtkButton *button, gpointer user_data);
 void on_delete_tail_button_clicked(GtkButton *button, gpointer user_data);
@@ -91,7 +94,9 @@ int main(int argc, char *argv[]) {
   g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
   GtkWidget *drawing_area = gtk_drawing_area_new();
   g_signal_connect(drawing_area, "draw", G_CALLBACK(draw_linked_list), NULL);
-  GtkWidget *insert_button = gtk_button_new_with_label("Insert");
+  GtkWidget *create_list = gtk_button_new_with_label("Create List");
+  GtkWidget *insert_head_button = gtk_button_new_with_label("Insert head");
+  GtkWidget *insert_tail_button = gtk_button_new_with_label("Insert tail");
   GtkWidget *delete_button = gtk_button_new_with_label("Delete");
   GtkWidget *delete_head_button = gtk_button_new_with_label("Delete Head");
   GtkWidget *delete_tail_button = gtk_button_new_with_label("Delete Tail");
@@ -107,7 +112,9 @@ int main(int argc, char *argv[]) {
   gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 5);
   gtk_box_pack_start(GTK_BOX(hbox), entry_label, FALSE, FALSE, 5);
   gtk_box_pack_start(GTK_BOX(hbox), entry, TRUE, TRUE, 5);
-  gtk_box_pack_start(GTK_BOX(hbox), insert_button, FALSE, FALSE, 5);
+  gtk_box_pack_start(GTK_BOX(hbox), create_list, FALSE, FALSE, 5);
+  gtk_box_pack_start(GTK_BOX(hbox), insert_head_button, FALSE, FALSE, 5);
+  gtk_box_pack_start(GTK_BOX(hbox), insert_tail_button, FALSE, FALSE, 5);
   gtk_box_pack_start(GTK_BOX(hbox), delete_button, FALSE, FALSE, 5);
   gtk_box_pack_start(GTK_BOX(hbox), delete_head_button, FALSE, FALSE, 5);
   gtk_box_pack_start(GTK_BOX(hbox), delete_tail_button, FALSE, FALSE, 5);
@@ -116,7 +123,9 @@ int main(int argc, char *argv[]) {
   gtk_box_pack_start(GTK_BOX(hbox), clear_button, FALSE, FALSE, 5);
   g_object_set_data(G_OBJECT(drawing_area), "entry", entry);
   g_object_set_data(G_OBJECT(drawing_area), "drawing_area", drawing_area);
-  g_signal_connect(insert_button, "clicked", G_CALLBACK(on_insert_button_clicked), drawing_area);
+  g_signal_connect(insert_head_button, "clicked", G_CALLBACK(on_create_list_button_clicked), drawing_area);
+  g_signal_connect(insert_head_button, "clicked", G_CALLBACK(on_insert_head_button_clicked), drawing_area);
+  g_signal_connect(insert_tail_button, "clicked", G_CALLBACK(on_insert_tail_button_clicked), drawing_area);
   g_signal_connect(delete_button, "clicked", G_CALLBACK(on_delete_button_clicked), drawing_area);
   g_signal_connect(delete_head_button, "clicked", G_CALLBACK(on_delete_head_button_clicked), drawing_area);
   g_signal_connect(delete_tail_button, "clicked", G_CALLBACK(on_delete_tail_button_clicked), drawing_area);
@@ -164,47 +173,44 @@ void add_node(int value) {
 }
 
 // Function to add a new node with the given value at the head of the linked list
-void add_node_at_head(int value) {
+void create_list(int value) {
   // Create a new node and allocate memory for it
   Node *new_node = (Node *)g_malloc(sizeof(Node));
   new_node->value = value;
-
-  // If the list is empty, make the new node the head
+  initialize_opacity(new_node);  // Initialize opacity for the new node
   if (head == NULL) {
     new_node->next = NULL;
     head = new_node;
   } else {
-    // Make the new node the head and update the next pointer
-    new_node->next = head;
-    head = new_node;
+    // show a text message to say that the list is already created
+    show_message("The list is already created");
   }
 }
 
-// Function to add a new node with the given value before a node with the target value
-void add_node_before_value(int new_value, int target_value) {
+// Function to add a new node with the given value at the head of the linked list
+void add_node_at_head(int value) {
   // Create a new node and allocate memory for it
   Node *new_node = (Node *)g_malloc(sizeof(Node));
-  new_node->value = new_value;
+  new_node->value = value;
+  initialize_opacity(new_node);  // Initialize opacity for the new node
+  // Make the new node the head and update the next pointer
+  new_node->next = head;
+  head = new_node;
+}
 
-  Node *current = head;
-  Node *prev = NULL;
-
-  // Traverse the list to find the node with the target value
-  while (current != NULL && current->value != target_value) {
-    prev = current;
-    current = current->next;
+// Function to add a new node with the given value at the tail of the linked list
+void add_node_at_tail(int value) {
+  // Create a new node and allocate memory for it
+  Node *new_node = (Node *)g_malloc(sizeof(Node));
+  new_node->value = value;
+  new_node->next = NULL;
+  initialize_opacity(new_node);  // Initialize opacity for the new node
+  // Traverse to the end of the list and add the new node
+  Node *last = head;
+  while (last->next != NULL) {
+    last = last->next;
   }
-
-  // If the target value is found, insert the new node before it
-  if (current != NULL) {
-    if (prev != NULL) {
-      new_node->next = current;
-      prev->next = new_node;
-    } else {
-      new_node->next = head;
-      head = new_node;
-    }
-  }
+  last->next = new_node;
 }
 
 // Function to delete a node with the given value from the linked list
@@ -503,12 +509,32 @@ void clear_entry(GtkEntry *entry, gpointer user_data) {
   gtk_entry_set_text(entry, "");
 }
 
-// Event handler for the insert button click event
-void on_insert_button_clicked(GtkButton *button, gpointer user_data) {
+// Event handler for the insert at the head button click event
+void on_insert_head_button_clicked(GtkButton *button, gpointer user_data) {
   GtkWidget *entry = GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "entry"));
   const gchar *text = gtk_entry_get_text(GTK_ENTRY(entry));
   int value = atoi(text);
   add_node(value);
+  gtk_entry_set_text(GTK_ENTRY(entry), "");  // Clear the entry
+  gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
+}
+
+// Event handler for the creation of button click event
+void on_create_list_button_clicked(GtkButton *button, gpointer user_data) {
+  GtkWidget *entry = GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "entry"));
+  const gchar *text = gtk_entry_get_text(GTK_ENTRY(entry));
+  int value = atoi(text);
+  create_list(value);
+  gtk_entry_set_text(GTK_ENTRY(entry), "");  // Clear the entry
+  gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
+}
+
+// Event handler for the insert at the head button click event
+void on_insert_tail_button_clicked(GtkButton *button, gpointer user_data) {
+  GtkWidget *entry = GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "entry"));
+  const gchar *text = gtk_entry_get_text(GTK_ENTRY(entry));
+  int value = atoi(text);
+  add_node_at_tail(value);
   gtk_entry_set_text(GTK_ENTRY(entry), "");  // Clear the entry
   gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
 }
