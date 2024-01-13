@@ -4,19 +4,19 @@ This GTK 3 desktop application is designed to visually represent and manipulate 
 
 ## Features
 
-**<h3>Dynamic Linked List Operations:</h3>** Add, remove, and search for elements in the linked list.
+**Dynamic Linked List Operations:** Add, remove, and search for elements in the linked list.
 
-**<h3>Modern User Interface:</h3>** Styled with CSS for a sleek and responsive design.
+**Modern User Interface:** Styled with CSS for a sleek and responsive design.
 
-**<h3>Real-time Visual Feedback:</h3>** Visualize changes in the linked list as they happen.
+**Real-time Visual Feedback:** Visualize changes in the linked list as they happen.
 
-**<h3>Interactive Animations:</h3>** Special animations during search operations for enhanced user experience.
+**Interactive Animations:** Special animations during search operations for enhanced user experience.
 
 ## Technology Stack
 
-**<h3>GTK+ 3:</h3>** For creating the graphical user interface.
+**GTK+ 3:** For creating the graphical user interface.
 
-**<h3>C Programming Language:</h3>** The core logic of the application.
+**C Programming Language:** The core logic of the application.
 
 ## Compilation Instructions:
 
