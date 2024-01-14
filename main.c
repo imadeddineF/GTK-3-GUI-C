@@ -172,20 +172,21 @@ void add_node(int value) {
   last->next = new_node;
 }
 
-// Function to add a new node with the given value at the head of the linked list
+ // Function to create a new list with the given value at the head of the linked list
 void create_list(int value) {
+  // Clear the existing list
+  clear_list();
+
   // Create a new node and allocate memory for it
   Node *new_node = (Node *)g_malloc(sizeof(Node));
   new_node->value = value;
   initialize_opacity(new_node);  // Initialize opacity for the new node
-  if (head == NULL) {
-    new_node->next = NULL;
-    head = new_node;
-  } else {
-    // show a text message to say that the list is already created
-    show_message("The list is already created");
-  }
+
+  // Make the new node the head and update the next pointer
+  new_node->next = NULL;
+  head = new_node;
 }
+
 
 // Function to add a new node with the given value at the head of the linked list
 void add_node_at_head(int value) {
