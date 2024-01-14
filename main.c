@@ -4,7 +4,7 @@
 typedef struct Node {
   int value;
   struct Node *next;
-  double opacity;  // Opacity for animation
+  double opacity;  // Opacity for search animation
 } Node;
 Node *head;
 bool created = false;
@@ -40,7 +40,7 @@ const gchar *css_style =
 
 gboolean animate(GtkWidget *widget);
 
-// Function declarations
+// Logic function declarations
 Node *create_list();
 void add_node_at_head(int value);
 void add_node_at_tail(int value);
@@ -55,7 +55,7 @@ void delete_node_tail();
 void clear_list();
 void initialize_opacity(Node *node);
 
-// Other function declarations
+// UI function declarations
 void draw_capsule(GtkWidget *widget, cairo_t *cr, gint x, gint y, gint width, gint height, gchar *text, gboolean is_head);
 void draw_linked_list(GtkWidget *widget, cairo_t *cr, gpointer user_data);
 void clear_entry(GtkEntry *entry, gpointer user_data);
@@ -70,13 +70,22 @@ void on_sort_button_clicked(GtkButton *button, gpointer user_data);
 void on_clear_button_clicked(GtkButton *button, gpointer user_data);
 void show_message(const gchar *message);
 
-// The main function
+// The main function of the GTK application
 int main(int argc, char *argv[]) {
+  // Initialize GTK
   gtk_init(&argc, &argv);
+
+  // Create a new top-level window
   GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  // Connect the 'destroy' event to the main_quit function to close the application
   g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+
+  // Create a drawing area widget for custom drawings
   GtkWidget *drawing_area = gtk_drawing_area_new();
+  // Connect the 'draw' event for the drawing area to the draw_linked_list callback function
   g_signal_connect(drawing_area, "draw", G_CALLBACK(draw_linked_list), NULL);
+
+  // Create buttons for various actions in the application
   GtkWidget *create_list = gtk_button_new_with_label("Create List");
   GtkWidget *insert_head_button = gtk_button_new_with_label("Insert head");
   GtkWidget *insert_tail_button = gtk_button_new_with_label("Insert tail");
@@ -86,15 +95,29 @@ int main(int argc, char *argv[]) {
   GtkWidget *search_button = gtk_button_new_with_label("Search");
   GtkWidget *sort_button = gtk_button_new_with_label("Sort");
   GtkWidget *clear_button = gtk_button_new_with_label("Clear");
+
+  // Create an entry widget for user input
   GtkWidget *entry = gtk_entry_new();
+  // Create a label for the entry widget
   GtkWidget *entry_label = gtk_label_new("Enter value:");
+
+  // Create a vertical box to organize widgets vertically
   GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+  // Add the vertical box to the main window
   gtk_container_add(GTK_CONTAINER(window), vbox);
+  // Add the drawing area to the vertical box
   gtk_box_pack_start(GTK_BOX(vbox), drawing_area, TRUE, TRUE, 5);
+
+  // Create a horizontal box to organize some widgets horizontally
   GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+  // Add the horizontal box to the vertical box
   gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 5);
+
+  // Add the entry label and entry widget to the horizontal box
   gtk_box_pack_start(GTK_BOX(hbox), entry_label, FALSE, FALSE, 5);
   gtk_box_pack_start(GTK_BOX(hbox), entry, TRUE, TRUE, 5);
+
+  // Add all buttons to the horizontal box
   gtk_box_pack_start(GTK_BOX(hbox), create_list, FALSE, FALSE, 5);
   gtk_box_pack_start(GTK_BOX(hbox), insert_head_button, FALSE, FALSE, 5);
   gtk_box_pack_start(GTK_BOX(hbox), insert_tail_button, FALSE, FALSE, 5);
@@ -104,8 +127,12 @@ int main(int argc, char *argv[]) {
   gtk_box_pack_start(GTK_BOX(hbox), search_button, FALSE, FALSE, 5);
   gtk_box_pack_start(GTK_BOX(hbox), sort_button, FALSE, FALSE, 5);
   gtk_box_pack_start(GTK_BOX(hbox), clear_button, FALSE, FALSE, 5);
+
+  // Store references to the entry and drawing_area widgets for later use
   g_object_set_data(G_OBJECT(drawing_area), "entry", entry);
   g_object_set_data(G_OBJECT(drawing_area), "drawing_area", drawing_area);
+
+  // Connect 'clicked' signals of buttons to their respective callback functions
   g_signal_connect(create_list, "clicked", G_CALLBACK(on_create_list_button_clicked), drawing_area);
   g_signal_connect(insert_head_button, "clicked", G_CALLBACK(on_insert_head_button_clicked), drawing_area);
   g_signal_connect(insert_tail_button, "clicked", G_CALLBACK(on_insert_tail_button_clicked), drawing_area);
@@ -115,22 +142,37 @@ int main(int argc, char *argv[]) {
   g_signal_connect(search_button, "clicked", G_CALLBACK(on_search_button_clicked), drawing_area);
   g_signal_connect(sort_button, "clicked", G_CALLBACK(on_sort_button_clicked), drawing_area);
   g_signal_connect(clear_button, "clicked", G_CALLBACK(on_clear_button_clicked), drawing_area);
+
+  // Connect the 'activate' signal of the entry to the clear_entry callback function
   g_signal_connect(entry, "activate", G_CALLBACK(clear_entry), NULL);
+
+  // Set the default size and title of the window
   gtk_window_set_default_size(GTK_WINDOW(window), 1000, 600);
   gtk_window_set_title(GTK_WINDOW(window), "Linked List");
+
+  // Create and configure a CSS provider for custom styling
   GtkCssProvider *provider = gtk_css_provider_new();
   const gchar *css = "window { background: url('./assets/background.png') repeat; }";
   GError *error = NULL;
   gtk_css_provider_load_from_data(provider, css, -1, &error);
-  // Set up animation
+
+  // Set up a periodic animation function to animate the opacity of the nodes
   g_timeout_add(100, (GSourceFunc)animate, drawing_area);
-  // Apply CSS styling
+
+  // Create another CSS provider for additional styling
   GtkCssProvider *cssProvider = gtk_css_provider_new();
+  // Load CSS styles defined in a global css_style variable
   gtk_css_provider_load_from_data(cssProvider, css_style, -1, NULL);
+  // Apply CSS styling to the screen
   gtk_style_context_add_provider_for_screen(gdk_screen_get_default(), GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
   gtk_style_context_add_provider_for_screen(gdk_screen_get_default(), GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+
+  // Show all widgets within the window
   gtk_widget_show_all(window);
+
+  // Run the GTK main event loop
   gtk_main();
+
   return 0;
 }
 
@@ -266,23 +308,13 @@ Node *search_node(int value) {
   return current;
 }
 
-// Function to sort the linked list using the selection sort algorithm
-void selection_sort() {
-  Node *i, *j;
-  int temp;
-
-  // Iterate over the list and compare each pair of nodes
-  for (i = head; i != NULL; i = i->next) {
-    for (j = i->next; j != NULL; j = j->next) {
-      // Swap the values if the current node is greater than the next node
-      if (i->value > j->value) {
-        temp = i->value;
-        i->value = j->value;
-        j->value = temp;
-      }
-    }
+// Function to clear the linked list
+void clear_list() {
+  while (head != NULL) {
+    Node *temp = head;
+    head = head->next;
+    g_free(temp);
   }
-  show_message("The list has been sorted successfully!");
 }
 
 // Function to sort the linked list using the insertion sort algorithm
@@ -315,6 +347,25 @@ void insertion_sort() {
   head = sorted;  // Update the head of the list
 }
 
+// We add these two logic functions without UI implementation
+// Function to sort the linked list using the selection sort algorithm
+void selection_sort() {
+  Node *i, *j;
+  int temp;
+
+  // Iterate over the list and compare each pair of nodes
+  for (i = head; i != NULL; i = i->next) {
+    for (j = i->next; j != NULL; j = j->next) {
+      // Swap the values if the current node is greater than the next node
+      if (i->value > j->value) {
+        temp = i->value;
+        i->value = j->value;
+        j->value = temp;
+      }
+    }
+  }
+  show_message("The list has been sorted successfully!");
+}
 // Function to sort the linked list using the bubble sort algorithm
 void bubble_sort() {
   int swapped;
@@ -587,17 +638,11 @@ void on_search_button_clicked(GtkButton *button, gpointer user_data) {
 
 // Event handler for the sort button click event
 void on_sort_button_clicked(GtkButton *button, gpointer user_data) {
-  selection_sort();
-  gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
-}
+  insertion_sort();
+  // selection_sort();
+  // bubble_sort();
 
-// Function to clear the linked list
-void clear_list() {
-  while (head != NULL) {
-    Node *temp = head;
-    head = head->next;
-    g_free(temp);
-  }
+  gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
 }
 
 // Event handler for the clear button click event
