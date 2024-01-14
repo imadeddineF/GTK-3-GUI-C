@@ -514,10 +514,11 @@ void on_insert_head_button_clicked(GtkButton *button, gpointer user_data) {
   GtkWidget *entry = GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "entry"));
   const gchar *text = gtk_entry_get_text(GTK_ENTRY(entry));
   int value = atoi(text);
-  add_node(value);
+  add_node_at_head(value);  // Use add_node_at_head instead of add_node
   gtk_entry_set_text(GTK_ENTRY(entry), "");  // Clear the entry
   gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
 }
+
 
 // Event handler for the creation of button click event
 void on_create_list_button_clicked(GtkButton *button, gpointer user_data) {
