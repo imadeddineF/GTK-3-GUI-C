@@ -123,7 +123,7 @@ int main(int argc, char *argv[]) {
   gtk_box_pack_start(GTK_BOX(hbox), clear_button, FALSE, FALSE, 5);
   g_object_set_data(G_OBJECT(drawing_area), "entry", entry);
   g_object_set_data(G_OBJECT(drawing_area), "drawing_area", drawing_area);
-  g_signal_connect(insert_head_button, "clicked", G_CALLBACK(on_create_list_button_clicked), drawing_area);
+  g_signal_connect(create_list, "clicked", G_CALLBACK(on_create_list_button_clicked), drawing_area);
   g_signal_connect(insert_head_button, "clicked", G_CALLBACK(on_insert_head_button_clicked), drawing_area);
   g_signal_connect(insert_tail_button, "clicked", G_CALLBACK(on_insert_tail_button_clicked), drawing_area);
   g_signal_connect(delete_button, "clicked", G_CALLBACK(on_delete_button_clicked), drawing_area);
@@ -594,7 +594,7 @@ void on_search_button_clicked(GtkButton *button, gpointer user_data) {
     // Perform animation for the current node
     current->opacity = 0.0;
     gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
-    g_usleep(100000);  // Sleep for 100,000 microseconds (0.1 seconds)
+    g_usleep(100);  // Sleep for 100,000 microseconds (0.1 seconds)
 
     current = current->next;
   }
@@ -604,7 +604,7 @@ void on_search_button_clicked(GtkButton *button, gpointer user_data) {
     // Element found
     current->opacity = 1.0;  // Highlight the found node
     gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
-    g_usleep(2000000);  // Sleep for 2,000,000 microseconds (2 seconds)
+    g_usleep(200);  // Sleep for 2,000,000 microseconds (2 seconds)
 
     gchar message[100];
     g_snprintf(message, sizeof(message), "THE NUMBER %d EXISTS IN THE LIST", current->value);
