@@ -198,22 +198,30 @@ void add_node_at_head(int value) {
 
 // Function to add a new node with the given value at the tail of the linked list
 void add_node_at_tail(int value) {
+  // Create a new node and allocate memory for it
+  Node *new_node = (Node *)g_malloc(sizeof(Node));
+  new_node->value = value;
+  new_node->next = NULL;
+  initialize_opacity(new_node);  // Initialize opacity for the new node
+
   if (created == true) {
-    // Create a new node and allocate memory for it
-    Node *new_node = (Node *)g_malloc(sizeof(Node));
-    new_node->value = value;
-    new_node->next = NULL;
-    initialize_opacity(new_node);  // Initialize opacity for the new node
-    // Traverse to the end of the list and add the new node
-    Node *last = head;
-    while (last->next != NULL) {
-      last = last->next;
+    if (head == NULL) {
+      // If the list is empty, make the new node the head
+      head = new_node;
+    } else {
+      // Traverse to the end of the list and add the new node
+      Node *last = head;
+      while (last->next != NULL) {
+        last = last->next;
+      }
+      last->next = new_node;
     }
-    last->next = new_node;
   } else {
     show_message("Create a list first!");
+    g_free(new_node);  // Free the memory allocated for the new node
   }
 }
+
 
 // Function to delete a node with the given value from the linked list
 void delete_node(int value) {
