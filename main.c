@@ -6,7 +6,8 @@ typedef struct Node {
   struct Node *next;
   double opacity;  // Opacity for animation
 } Node;
-Node *head = NULL;
+Node *head;
+bool created = false;
 
 // CSS for modern styling
 const gchar *css_style =
@@ -17,12 +18,6 @@ const gchar *css_style =
     "  border-radius: 10px;"
     "  padding: 5px 10px;"
     "  font-size: 14px;"
-    "  transition: background-color 0.3s, color 0.3s;"
-    "}"
-
-    "button:hover {"
-    "  background-color: #2980b9;"
-    "  color: #ffffff;"
     "}"
 
     "label {"
@@ -41,24 +36,12 @@ const gchar *css_style =
 
     "entry:focus {"
     "  border-color: #2980b9;"
-    "}"
-
-    // Additional styles for animation during search
-    "entry.searching {"
-    "  border-color: #f39c12 !important;"
-    "  transition: border-color 0.5s;"
-    "}"
-
-    "node.found {"
-    "  background-color: #27ae60;"  // Green color for found node
-    "  transition: fill 0.1s;"
     "}";
 
 gboolean animate(GtkWidget *widget);
 
 // Function declarations
-void add_node(int value);
-void create_list(int value);
+Node *create_list();
 void add_node_at_head(int value);
 void add_node_at_tail(int value);
 void delete_node(int value);
@@ -150,89 +133,132 @@ int main(int argc, char *argv[]) {
   gtk_main();
   return 0;
 }
-// Function to add a new node with the given value to the end of the linked list
-void add_node(int value) {
-  // Create a new node and allocate memory for it
-  Node *new_node = g_malloc(sizeof(Node));
-  new_node->value = value;
-  new_node->next = NULL;
-  initialize_opacity(new_node);  // Initialize opacity for the new node
 
-  // If the list is empty, make the new node the head
-  if (head == NULL) {
-    head = new_node;
-    return;
-  }
-
-  // Traverse to the end of the list and add the new node
-  Node *last = head;
-  while (last->next != NULL) {
-    last = last->next;
-  }
-  last->next = new_node;
+// Function to create the head of the linked list without initializing the first node
+Node *create_list() {
+  Node *head = NULL;
+  created = true;
+  // Show a text message to indicate that the list has been created
+  show_message("The list has been created successfully!");
+  return head;
 }
-
- // Function to create a new list with the given value at the head of the linked list
-void create_list(int value) {
-  // Clear the existing list
-  clear_list();
-
-  // Create a new node and allocate memory for it
-  Node *new_node = (Node *)g_malloc(sizeof(Node));
-  new_node->value = value;
-  initialize_opacity(new_node);  // Initialize opacity for the new node
-
-  // Make the new node the head and update the next pointer
-  new_node->next = NULL;
-  head = new_node;
-}
-
 
 // Function to add a new node with the given value at the head of the linked list
 void add_node_at_head(int value) {
   // Create a new node and allocate memory for it
-  Node *new_node = (Node *)g_malloc(sizeof(Node));
-  new_node->value = value;
-  initialize_opacity(new_node);  // Initialize opacity for the new node
-  // Make the new node the head and update the next pointer
-  new_node->next = head;
-  head = new_node;
+  if (created == true) {
+    Node *new_node = (Node *)g_malloc(sizeof(Node));
+    new_node->value = value;
+    initialize_opacity(new_node);  // Initialize opacity for the new node
+    // Make the new node the head and update the next pointer
+    new_node->next = head;
+    head = new_node;
+  } else {
+    show_message("Create a list first!");
+  }
 }
 
-// Function to add a new node with the given value at the tail of the linked list
+ // Function to add a new node with the given value at the tail of the linked list
 void add_node_at_tail(int value) {
   // Create a new node and allocate memory for it
   Node *new_node = (Node *)g_malloc(sizeof(Node));
   new_node->value = value;
   new_node->next = NULL;
   initialize_opacity(new_node);  // Initialize opacity for the new node
-  // Traverse to the end of the list and add the new node
-  Node *last = head;
-  while (last->next != NULL) {
-    last = last->next;
+
+  if (created == true) {
+    if (head == NULL) {
+      // If the list is empty, make the new node the head
+      head = new_node;
+    } else {
+      // Traverse to the end of the list and add the new node
+      Node *last = head;
+      while (last->next != NULL) {
+        last = last->next;
+      }
+      last->next = new_node;
+    }
+  } else {
+    show_message("Create a list first!");
+    g_free(new_node);  // Free the memory allocated for the new node
   }
-  last->next = new_node;
 }
+
 
 // Function to delete a node with the given value from the linked list
 void delete_node(int value) {
   Node *current = head;
   Node *prev = NULL;
 
-  // Traverse the list to find the node with the target value
-  while (current != NULL && current->value != value) {
-    prev = current;
-    current = current->next;
-  }
-
-  // If the target value is found, delete the node
-  if (current != NULL) {
-    if (prev != NULL) {
-      prev->next = current->next;
+  if (created == true) {
+    if (head != NULL) {
+      // Traverse the list to find the node with the target value
+      while (current != NULL && current->value != value) {
+        prev = current;
+        current = current->next;
+      }
+      // If the target value is found, delete the node
+      if (current != NULL) {
+        if (prev != NULL) {
+          prev->next = current->next;
+        } else {
+          head = current->next;
+        }
+        g_free(current);
+        show_message("The number has been deleted successfully!");
+      } else {
+        show_message("The number does not exist in the list!");
+      }
     } else {
-      head = current->next;
+      show_message("This list is empty!");
     }
-    g_free(current);
+  } else {
+    show_message("There is no list to delete from!");
+  }
+}
+
+// Function to delete the head node from the linked list
+void delete_node_head() {
+  if (created == true) {
+    if (head != NULL) {
+      Node *temp = head;
+      head = head->next;
+      g_free(temp);
+      show_message("The head node has been deleted successfully!");
+    } else {
+      show_message("This list is empty!");
+    }
+  } else {
+    show_message("There is no list to delete from!");
+  }
+}
+
+// Function to delete the tail node from the linked list
+void delete_node_tail() {
+  Node *current = head;
+  Node *prev = NULL;
+  if (created == true) {
+    if (head != NULL) {
+      // Traverse the list to find the tail node
+      while (current->next != NULL) {
+        prev = current;
+        current = current->next;
+      }
+
+      // Delete the tail node
+      if (prev != NULL) {
+        prev->next = NULL;
+        g_free(current);
+      } else {
+        g_free(current);
+        head = NULL;
+      }
+      show_message("The tail node has been deleted successfully!");
+    } else {
+      show_message("This list is empty!");
+    }
+  } else {
+    show_message("There is no list to delete from!");
   }
 }
 
@@ -264,6 +290,7 @@ void selection_sort() {
       }
     }
   }
+  show_message("The list has been sorted successfully!");
 }
 
 // Function to sort the linked list using the insertion sort algorithm
@@ -322,62 +349,6 @@ void bubble_sort() {
   } while (swapped);
 }
 
-// Function to delete the head node from the linked list
-void delete_node_head() {
-  if (head != NULL) {
-    Node *temp = head;
-    head = head->next;
-    g_free(temp);
-  }
-}
-
-// Function to delete the tail node from the linked list
-void delete_node_tail() {
-  if (head != NULL) {
-    Node *current = head;
-    Node *prev = NULL;
-
-    // Traverse the list to find the tail node
-    while (current->next != NULL) {
-      prev = current;
-      current = current->next;
-    }
-
-    // Delete the tail node
-    if (prev != NULL) {
-      prev->next = NULL;
-      g_free(current);
-    } else {
-      g_free(current);
-      head = NULL;
-    }
-  }
-}
-
-// Function to delete the node after a node with the target value from the linked list
-bool delete_node_after_value(int target_value) {
-  Node *current = head;
-  Node *prev = NULL;
-
-  // Traverse the list to find the node with the target value
-  while (current != NULL && current->value != target_value) {
-    prev = current;
-    current = current->next;
-  }
-
-  // If the target value is found and there is a node after it, delete the next node
-  if (current != NULL && current->next != NULL) {
-    Node *node_to_delete = current->next;
-    current->next = node_to_delete->next;
-    if (node_to_delete == head) {
-      head = node_to_delete->next;
-    }
-    g_free(node_to_delete);
-    return true;
-  }
-  return false;
-}
-
 // Function to display a message dialog with the given message
 void show_message(const gchar *message) {
   GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "%s", message);
@@ -415,9 +386,9 @@ void draw_capsule(GtkWidget *widget, cairo_t *cr, gint x, gint y, gint width, gi
 
   // Set the text color
   if (is_head) {
-    cairo_set_source_rgb(cr, 0, 0.45, 0.73);  // French Blue for head text
+    cairo_set_source_rgb(cr, 0, 0.45, 0.73);
   } else {
-    cairo_set_source_rgb(cr, 0, 0, 0);  // Black color for the text
+    cairo_set_source_rgb(cr, 0, 0, 0);
   }
 
   cairo_move_to(cr, text_x, text_y);
@@ -510,23 +481,23 @@ void clear_entry(GtkEntry *entry, gpointer user_data) {
   gtk_entry_set_text(entry, "");
 }
 
+// Event handler for the creation of button click event
+void on_create_list_button_clicked(GtkButton *button, gpointer user_data) {
+  // Check if the list has already been created
+  if (!created) {
+    head = create_list();
+  }
+  gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
+}
+
 // Event handler for the insert at the head button click event
 void on_insert_head_button_clicked(GtkButton *button, gpointer user_data) {
   GtkWidget *entry = GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "entry"));
   const gchar *text = gtk_entry_get_text(GTK_ENTRY(entry));
   int value = atoi(text);
-  add_node_at_head(value);  // Use add_node_at_head instead of add_node
-  gtk_entry_set_text(GTK_ENTRY(entry), "");  // Clear the entry
-  gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
-}
 
+  add_node_at_head(value);  // Corrected function call
 
-// Event handler for the creation of button click event
-void on_create_list_button_clicked(GtkButton *button, gpointer user_data) {
-  GtkWidget *entry = GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "entry"));
-  const gchar *text = gtk_entry_get_text(GTK_ENTRY(entry));
-  int value = atoi(text);
-  create_list(value);
   gtk_entry_set_text(GTK_ENTRY(entry), "");  // Clear the entry
   gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
 }
