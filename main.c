@@ -84,11 +84,11 @@ int main(int argc, char *argv[]) {
 
   // Create buttons for various actions in the application
   GtkWidget *create_list = gtk_button_new_with_label("Create");
-  GtkWidget *insert_head_button = gtk_button_new_with_label("Insert h");
-  GtkWidget *insert_tail_button = gtk_button_new_with_label("Insert t");
+  GtkWidget *insert_head_button = gtk_button_new_with_label("Insert T");
+  GtkWidget *insert_tail_button = gtk_button_new_with_label("Insert Q");
   GtkWidget *delete_button = gtk_button_new_with_label("Delete");
-  GtkWidget *delete_head_button = gtk_button_new_with_label("Delete h");
-  GtkWidget *delete_tail_button = gtk_button_new_with_label("Delete t");
+  GtkWidget *delete_head_button = gtk_button_new_with_label("Delete T");
+  GtkWidget *delete_tail_button = gtk_button_new_with_label("Delete Q");
   GtkWidget *search_button = gtk_button_new_with_label("Search");
   GtkWidget *sort_button = gtk_button_new_with_label("Sort");
   GtkWidget *clear_button = gtk_button_new_with_label("Clear");
@@ -403,6 +403,108 @@ void show_message(const gchar *message) {
   gtk_widget_destroy(dialog);
 }
 
+// Function to draw a capsule shape with the given properties
+void draw_capsule(GtkWidget *widget, cairo_t *cr, gint x, gint y, gint width, gint height, gchar *text, gboolean is_head) {
+  // Draw the capsule frame
+  gint radius = height / 2;
+  cairo_set_source_rgb(cr, 0, 0.45, 0.73);  // Blue for frame
+  cairo_move_to(cr, x + radius, y);
+  cairo_line_to(cr, x + width - radius, y);
+  cairo_arc(cr, x + width - radius, y + radius, radius, -G_PI / 2, 0);
+  cairo_line_to(cr, x + width, y + height - radius);
+  cairo_arc(cr, x + width - radius, y + height - radius, radius, 0, G_PI / 2);
+  cairo_line_to(cr, x + radius, y + height);
+  cairo_arc(cr, x + radius, y + height - radius, radius, G_PI / 2, G_PI);
+  cairo_line_to(cr, x, y + radius);
+  cairo_arc(cr, x + radius, y + radius, radius, G_PI, 3 * G_PI / 2);
+  cairo_stroke_preserve(cr);
+
+  // Set a background color
+  cairo_set_source_rgb(cr, 0.69, 0.88, 0.9);  // Blue for fill
+  cairo_fill(cr);
+
+  // Center the text inside the capsule
+  PangoLayout *layout = gtk_widget_create_pango_layout(widget, text);
+  PangoRectangle rect;
+  pango_layout_get_pixel_extents(layout, NULL, &rect);
+
+  gint text_x = x + (width - rect.width) / 2;
+  gint text_y = y + (height - rect.height) / 2;
+
+  // Set the text color
+  if (is_head) {
+    cairo_set_source_rgb(cr, 0, 0.45, 0.73);
+  } else {
+    cairo_set_source_rgb(cr, 0, 0, 0);
+  }
+
+  cairo_move_to(cr, text_x, text_y);
+  pango_cairo_show_layout(cr, layout);
+  g_object_unref(layout);
+}
+
+// Function to draw the linked list on a drawing area widget
+void draw_linked_list(GtkWidget *widget, cairo_t *cr, gpointer user_data) {
+  Node *current = head;
+  gint x = 50, y = 50;
+  gint capsule_width = 80;
+  gint capsule_height = 40;
+  gint arrow_distance = 20;
+
+  // Draw the head node with an arrow pointing to the first node
+  if (current != NULL) {
+    draw_capsule(widget, cr, x, y, capsule_width, capsule_height, "head", TRUE);
+    // Draw an arrow from head to the first node
+    cairo_set_source_rgb(cr, 0, 0.45, 0.73);  // French Blue
+    cairo_move_to(cr, x + capsule_width, y + capsule_height / 2);
+    cairo_line_to(cr, x + capsule_width + arrow_distance, y + capsule_height / 2);
+    cairo_stroke(cr);
+    cairo_move_to(cr, x + capsule_width + arrow_distance, y + capsule_height / 2);
+    cairo_line_to(cr, x + capsule_width + arrow_distance - 10, y + capsule_height / 2 - 5);
+    cairo_line_to(cr, x + capsule_width + arrow_distance - 10, y + capsule_height / 2 + 5);
+    cairo_close_path(cr);
+    cairo_fill(cr);
+    x += capsule_width + arrow_distance;
+  }
+
+  // Draw the remaining nodes in the linked list
+  while (current != NULL) {
+    gchar value_str[10];
+    if (current->value >= 0 && current->value < 10) {
+      // Add a leading zero for numbers 0 to 9
+      g_snprintf(value_str, sizeof(value_str), "0%d", current->value);
+    } else {
+      g_snprintf(value_str, sizeof(value_str), "%d", current->value);
+    }
+
+    // Set the opacity based on the animation progress
+    cairo_set_source_rgba(cr, 0, 0, 0, current->opacity);
+    draw_capsule(widget, cr, x, y, strlen(value_str) * 10 + 20, capsule_height, value_str, FALSE);
+    x += strlen(value_str) * 10 + 20 + arrow_distance;
+
+    if (current->next != NULL) {
+      cairo_set_source_rgb(cr, 0, 0.45, 0.73);  // French Blue
+      cairo_move_to(cr, x - arrow_distance, y + capsule_height / 2);
+      cairo_line_to(cr, x, y + capsule_height / 2);
+      cairo_stroke(cr);
+      cairo_move_to(cr, x, y + capsule_height / 2);
+      cairo_line_to(cr, x - 10, y + capsule_height / 2 - 5);
+      cairo_line_to(cr, x - 10, y + capsule_height / 2 + 5);
+      cairo_close_path(cr);
+      cairo_fill(cr);
+    }
+    current = current->next;
+  }
+
+  // Add animation for capsule movement
+  static gint animation_step = 0;
+  if (animation_step < x) {
+    x -= 5;  // Adjust the step size as needed
+    animation_step += 1;
+    gtk_widget_queue_draw(widget);
+  }
+}
+
 // Function to animate the opacity of the nodes in the linked list
 gboolean animate(GtkWidget *widget) {
   Node *current = head;
@@ -441,7 +543,7 @@ void on_insert_head_button_clicked(GtkButton *button, gpointer user_data) {
   const gchar *text = gtk_entry_get_text(GTK_ENTRY(entry));
   int value = atoi(text);
 
-  add_node_at_head(value);  // Corrected function call
+  add_node_at_head(value);
 
   gtk_entry_set_text(GTK_ENTRY(entry), "");  // Clear the entry
   gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
@@ -504,7 +606,8 @@ void on_search_button_clicked(GtkButton *button, gpointer user_data) {
       gchar node_name[20];
       g_snprintf(node_name, sizeof(node_name), "node-%d", current->value);
       GtkWidget *drawing_area = GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area"));
-      gtk_widget_set_name(gtk_bin_get_child(GTK_BIN(drawing_area)), "");  // Remove existing node style
+      // Remove existing node style
+      gtk_widget_set_name(gtk_bin_get_child(GTK_BIN(drawing_area)), "");
       gtk_widget_set_name(gtk_bin_get_child(GTK_BIN(drawing_area)), node_name);
       break;
     }
@@ -512,7 +615,7 @@ void on_search_button_clicked(GtkButton *button, gpointer user_data) {
     // Perform animation for the current node
     current->opacity = 0.0;
     gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
-    g_usleep(100);  // Sleep for 100,000 microseconds (0.1 seconds)
+    g_usleep(100000);  // microseconds (0.1 seconds)
 
     current = current->next;
   }
@@ -522,15 +625,15 @@ void on_search_button_clicked(GtkButton *button, gpointer user_data) {
     // Element found
     current->opacity = 1.0;  // Highlight the found node
     gtk_widget_queue_draw(GTK_WIDGET(g_object_get_data(G_OBJECT(user_data), "drawing_area")));
-    g_usleep(200);  // Sleep for 2,000,000 microseconds (2 seconds)
+    g_usleep(1000000);  // microseconds (1 second)
 
     gchar message[100];
-    g_snprintf(message, sizeof(message), "THE NUMBER %d EXISTS IN THE LIST", current->value);
+    g_snprintf(message, sizeof(message), "The number %d exists in the list", current->value);
     show_message(message);
   } else {
     // Element not found
     gchar message[100];
-    g_snprintf(message, sizeof(message), "THE NUMBER %d DOES NOT EXIST IN THE LIST", value);
+    g_snprintf(message, sizeof(message), "The number %d does not exists in the list", value);
     show_message(message);
   }
 
