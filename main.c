@@ -7,6 +7,7 @@ typedef struct Node {
   double opacity;  // Opacity for search animation
 } Node;
 Node *head;
+// check if the list has been created
 bool created = false;
 
 // CSS for modern styling
@@ -20,10 +21,6 @@ const gchar *css_style =
     "  font-size: 14px;"
     "}"
 
-    "label {"
-    "  color: #ffffff;"
-    "}"
-
     "entry {"
     "  margin: 5px;"
     "  padding: 5px;"
@@ -31,7 +28,6 @@ const gchar *css_style =
     "  color: #000000;"
     "  font-size: 16px;"
     "  background-color: #ffffff;"
-    "  transition: border-color 0.3s;"
     "}"
 
     "entry:focus {"
