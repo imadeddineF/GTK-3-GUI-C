@@ -34,6 +34,7 @@ const gchar *css_style =
     "  border-color: #2980b9;"
     "}";
 
+// The animation function declaration
 gboolean animate(GtkWidget *widget);
 
 // Logic function declarations
@@ -82,12 +83,18 @@ int main(int argc, char *argv[]) {
   g_signal_connect(drawing_area, "draw", G_CALLBACK(draw_linked_list), NULL);
 
   // Create buttons for various actions in the application
+<<<<<<< HEAD
   GtkWidget *create_list = gtk_button_new_with_label("Create List");
   GtkWidget *insert_head_button = gtk_button_new_with_label("Insert head");
   GtkWidget *insert_tail_button = gtk_button_new_with_label("Insert tail");
+=======
+  GtkWidget *create_list = gtk_button_new_with_label("Create");
+  GtkWidget *insert_head_button = gtk_button_new_with_label("Insert h");
+  GtkWidget *insert_tail_button = gtk_button_new_with_label("Insert t");
+>>>>>>> 9bbcda0c902a1e869ca19fa66d0de2a050a97ea8
   GtkWidget *delete_button = gtk_button_new_with_label("Delete");
-  GtkWidget *delete_head_button = gtk_button_new_with_label("Delete Head");
-  GtkWidget *delete_tail_button = gtk_button_new_with_label("Delete Tail");
+  GtkWidget *delete_head_button = gtk_button_new_with_label("Delete h");
+  GtkWidget *delete_tail_button = gtk_button_new_with_label("Delete t");
   GtkWidget *search_button = gtk_button_new_with_label("Search");
   GtkWidget *sort_button = gtk_button_new_with_label("Sort");
   GtkWidget *clear_button = gtk_button_new_with_label("Clear");
@@ -403,6 +410,7 @@ void show_message(const gchar *message) {
   gtk_widget_destroy(dialog);
 }
 
+<<<<<<< HEAD
 // Function to draw a capsule shape with the given properties
 void draw_capsule(GtkWidget *widget, cairo_t *cr, gint x, gint y, gint width, gint height, gchar *text, gboolean is_head) {
   // Draw the capsule frame
@@ -505,6 +513,8 @@ void draw_linked_list(GtkWidget *widget, cairo_t *cr, gpointer user_data) {
   }
 }
 
+=======
+>>>>>>> 9bbcda0c902a1e869ca19fa66d0de2a050a97ea8
 // Function to animate the opacity of the nodes in the linked list
 gboolean animate(GtkWidget *widget) {
   Node *current = head;
