@@ -34,6 +34,7 @@ const gchar *css_style =
     "  border-color: #2980b9;"
     "}";
 
+// The animation function declaration
 gboolean animate(GtkWidget *widget);
 
 // Logic function declarations
@@ -82,12 +83,12 @@ int main(int argc, char *argv[]) {
   g_signal_connect(drawing_area, "draw", G_CALLBACK(draw_linked_list), NULL);
 
   // Create buttons for various actions in the application
-  GtkWidget *create_list = gtk_button_new_with_label("Create List");
-  GtkWidget *insert_head_button = gtk_button_new_with_label("Insert head");
-  GtkWidget *insert_tail_button = gtk_button_new_with_label("Insert tail");
+  GtkWidget *create_list = gtk_button_new_with_label("Create");
+  GtkWidget *insert_head_button = gtk_button_new_with_label("Insert h");
+  GtkWidget *insert_tail_button = gtk_button_new_with_label("Insert t");
   GtkWidget *delete_button = gtk_button_new_with_label("Delete");
-  GtkWidget *delete_head_button = gtk_button_new_with_label("Delete Head");
-  GtkWidget *delete_tail_button = gtk_button_new_with_label("Delete Tail");
+  GtkWidget *delete_head_button = gtk_button_new_with_label("Delete h");
+  GtkWidget *delete_tail_button = gtk_button_new_with_label("Delete t");
   GtkWidget *search_button = gtk_button_new_with_label("Search");
   GtkWidget *sort_button = gtk_button_new_with_label("Sort");
   GtkWidget *clear_button = gtk_button_new_with_label("Clear");
@@ -198,20 +199,27 @@ void add_node_at_head(int value) {
 
 // Function to add a new node with the given value at the tail of the linked list
 void add_node_at_tail(int value) {
+  // Create a new node and allocate memory for it
+  Node *new_node = (Node *)g_malloc(sizeof(Node));
+  new_node->value = value;
+  new_node->next = NULL;
+  initialize_opacity(new_node);  // Initialize opacity for the new node
+
   if (created == true) {
-    // Create a new node and allocate memory for it
-    Node *new_node = (Node *)g_malloc(sizeof(Node));
-    new_node->value = value;
-    new_node->next = NULL;
-    initialize_opacity(new_node);  // Initialize opacity for the new node
-    // Traverse to the end of the list and add the new node
-    Node *last = head;
-    while (last->next != NULL) {
-      last = last->next;
+    if (head == NULL) {
+      // If the list is empty, make the new node the head
+      head = new_node;
+    } else {
+      // Traverse to the end of the list and add the new node
+      Node *last = head;
+      while (last->next != NULL) {
+        last = last->next;
+      }
+      last->next = new_node;
     }
-    last->next = new_node;
   } else {
     show_message("Create a list first!");
+    g_free(new_node);  // Free the memory allocated for the new node
   }
 }
 
@@ -393,108 +401,6 @@ void show_message(const gchar *message) {
   GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "%s", message);
   gtk_dialog_run(GTK_DIALOG(dialog));
   gtk_widget_destroy(dialog);
-}
-
-// Function to draw a capsule shape with the given properties
-void draw_capsule(GtkWidget *widget, cairo_t *cr, gint x, gint y, gint width, gint height, gchar *text, gboolean is_head) {
-  // Draw the capsule frame
-  gint radius = height / 2;
-  cairo_set_source_rgb(cr, 0, 0.45, 0.73);  // French Blue for frame
-  cairo_move_to(cr, x + radius, y);
-  cairo_line_to(cr, x + width - radius, y);
-  cairo_arc(cr, x + width - radius, y + radius, radius, -G_PI / 2, 0);
-  cairo_line_to(cr, x + width, y + height - radius);
-  cairo_arc(cr, x + width - radius, y + height - radius, radius, 0, G_PI / 2);
-  cairo_line_to(cr, x + radius, y + height);
-  cairo_arc(cr, x + radius, y + height - radius, radius, G_PI / 2, G_PI);
-  cairo_line_to(cr, x, y + radius);
-  cairo_arc(cr, x + radius, y + radius, radius, G_PI, 3 * G_PI / 2);
-  cairo_stroke_preserve(cr);
-
-  // Set a background color
-  cairo_set_source_rgb(cr, 0.69, 0.88, 0.9);  // Baby Blue for fill
-  cairo_fill(cr);
-
-  // Center the text inside the capsule
-  PangoLayout *layout = gtk_widget_create_pango_layout(widget, text);
-  PangoRectangle rect;
-  pango_layout_get_pixel_extents(layout, NULL, &rect);
-
-  gint text_x = x + (width - rect.width) / 2;
-  gint text_y = y + (height - rect.height) / 2;
-
-  // Set the text color
-  if (is_head) {
-    cairo_set_source_rgb(cr, 0, 0.45, 0.73);
-  } else {
-    cairo_set_source_rgb(cr, 0, 0, 0);
-  }
-
-  cairo_move_to(cr, text_x, text_y);
-  pango_cairo_show_layout(cr, layout);
-  g_object_unref(layout);
-}
-
-// Function to draw the linked list on a drawing area widget
-void draw_linked_list(GtkWidget *widget, cairo_t *cr, gpointer user_data) {
-  Node *current = head;
-  gint x = 50, y = 50;
-  gint capsule_width = 80;
-  gint capsule_height = 40;
-  gint arrow_distance = 20;
-
-  // Draw the head node with an arrow pointing to the first node
-  if (current != NULL) {
-    draw_capsule(widget, cr, x, y, capsule_width, capsule_height, "head", TRUE);
-    // Draw an arrow from head to the first node
-    cairo_set_source_rgb(cr, 0, 0.45, 0.73);  // French Blue
-    cairo_move_to(cr, x + capsule_width, y + capsule_height / 2);
-    cairo_line_to(cr, x + capsule_width + arrow_distance, y + capsule_height / 2);
-    cairo_stroke(cr);
-    cairo_move_to(cr, x + capsule_width + arrow_distance, y + capsule_height / 2);
-    cairo_line_to(cr, x + capsule_width + arrow_distance - 10, y + capsule_height / 2 - 5);
-    cairo_line_to(cr, x + capsule_width + arrow_distance - 10, y + capsule_height / 2 + 5);
-    cairo_close_path(cr);
-    cairo_fill(cr);
-    x += capsule_width + arrow_distance;
-  }
-
-  // Draw the remaining nodes in the linked list
-  while (current != NULL) {
-    gchar value_str[10];
-    if (current->value >= 0 && current->value < 10) {
-      // Add a leading zero for numbers 0 to 9
-      g_snprintf(value_str, sizeof(value_str), "0%d", current->value);
-    } else {
-      g_snprintf(value_str, sizeof(value_str), "%d", current->value);
-    }
-
-    // Set the opacity based on the animation progress
-    cairo_set_source_rgba(cr, 0, 0, 0, current->opacity);
-    draw_capsule(widget, cr, x, y, strlen(value_str) * 10 + 20, capsule_height, value_str, FALSE);
-    x += strlen(value_str) * 10 + 20 + arrow_distance;
-
-    if (current->next != NULL) {
-      cairo_set_source_rgb(cr, 0, 0.45, 0.73);  // French Blue
-      cairo_move_to(cr, x - arrow_distance, y + capsule_height / 2);
-      cairo_line_to(cr, x, y + capsule_height / 2);
-      cairo_stroke(cr);
-      cairo_move_to(cr, x, y + capsule_height / 2);
-      cairo_line_to(cr, x - 10, y + capsule_height / 2 - 5);
-      cairo_line_to(cr, x - 10, y + capsule_height / 2 + 5);
-      cairo_close_path(cr);
-      cairo_fill(cr);
-    }
-    current = current->next;
-  }
-
-  // Add animation for capsule movement
-  static gint animation_step = 0;
-  if (animation_step < x) {
-    x -= 5;  // Adjust the step size as needed
-    animation_step += 1;
-    gtk_widget_queue_draw(widget);
-  }
 }
 
 // Function to animate the opacity of the nodes in the linked list
